@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load config %}
+{% block page_title %}
+<h3>{% vocabulary "subscription" %} Zusammenstellung</h3>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
+<form class="form-inline" method="post" action="">
+    {% csrf_token %}
+    <input type="number" class="form-control" id="product_amount" name="product_amount" value="1" style="width:100px;">
+    <select id="product" class="form-control" name="product_id">
+        {% for product in products %}
+        <option class="" value="{{ product.id }}" name="product_selection">{{ product.display_units }} {{ product.unit_name }} {{ product.name }}</option>
+        {% endfor %}
+    </select>
+    <small id="productHelpText" class="form-text text-muted">
+    </small>
+    <button class="btn btn-primary" name="addProduct" type="submit">Hinzufügen</button>
+</form>
+<p>Dein {{ subscription_size }} {% vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende Produkte:</p>
+<table>
+    <tr>
+        {% for item in subscription_item %}
+        <td>
+            {{ item.display_amount }} {{ item.product.unit_name }} {{ item.product.name }}</td>
+        <td>
+            <small class="text-muted">
+                entspricht {{ item.amount_base_units }} {% vocabulary "base_unit" %}
+            </small>
+        </td>
+        <td>
+            <form class="form-inline" method="post" action="" style="display: inline;">
+                {% csrf_token %}
+                <button class="btn btn-link" type="submit" name="removeProduct" value="{{ item.id }}">entfernen</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<form method="post" action="">
+    <button class="btn btn-success">Speichern</button>
+</form>
+<script type="text/javascript">
+    window.onload = function() {
+        var products = {{ products_json | safe }};
+        var productSelectBox = document.querySelector('#product');
+        productSelectBox.onchange = function() {
+            var selectedProduct = products.find(function(prod) {
+                return prod.id == productSelectBox.options[productSelectBox.selectedIndex].value
+            });
+            document.querySelector('#productHelpText').innerText = "Entspricht " + selectedProduct.units + " {% vocabulary 'base_unit' %}"
+        };
+        productSelectBox.onchange();
+    };
+</script>
+{% endblock %}
