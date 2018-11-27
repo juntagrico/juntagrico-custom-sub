@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from juntagico_custom_sub import views as custom_sub
+from juntagrico_custom_sub import views
 
 urlpatterns = [
+    url('^my/subscription/content/(?P<subscription_id>.*?)/', views.subscription_content)
 ]
