@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,get_object_or_404
 from juntagrico_custom_sub.models import *
 from juntagrico.models import *
-from django.db.models import Sum
 
 import json
 import logging
@@ -13,37 +12,45 @@ logger = logging.getLogger(__name__)
 def subscription_content(request,subscription_id=None):
     returnValues = dict()
     member = request.user.member
-    future_subscription = member.future_subscription is not None
     if subscription_id is None:
         subscription = member.subscription
     else:
         subscription = get_object_or_404(Subscription, id=subscription_id)
-        future_subscription = future_subscription and not(
-            subscription == member.future_subscription)
-    if "addProduct" in request.POST:
-        productId = request.POST["product_id"]
-        product = Product.objects.get(id=productId)
-        productAmount = int(request.POST["product_amount"])
-        if is_subscription_content_valid(subscription,product,productAmount):
-            returnValues['error'] = "Dein Abo hat nicht genug Platz für weitere Produkte"
+    subContent = SubscriptionContent.objects.get(subscription=subscription)
+    products = Product.objects.all()
+    if "saveContent" in request.POST:
+        valid,error = new_content_valid(subscription,request,products)
+        if valid:
+            for product in products:
+                subItem,p  = SubscriptionContentFutureItem.objects.get_or_create(product=product,subscription_content=subContent,defaults={'amount': 0,'product':product,'subscription_content':subContent})
+                subItem.amount = request.POST.get("amount"+str(product.id),0)
+                subItem.save()
         else:
-            productContent = SubscriptionContent(amount=productAmount,product=product,subscription=subscription)
-            productContent.save()
-    if "removeProduct" in request.POST:
-        content = SubscriptionContent.objects.get(id=int(request.POST["removeProduct"]))
-        content.delete()
-    returnValues['subscription_item'] = SubscriptionContent.objects.filter(subscription=subscription_id)
-    returnValues['products'] = Product.objects.all()
-    returnValues['products_json'] = json.dumps(list(Product.objects.all().values()))
+            returnValues['error'] = error
+    for prod in products:
+        try:
+            subItem = SubscriptionContentFutureItem.objects.get(subscription_content=subContent,product=prod.id)
+            prod.amount_in_subscription = subItem.amount
+        except SubscriptionContentFutureItem.DoesNotExist:
+            prod.amount_in_subscription = 0
+    returnValues['products'] = products
     returnValues['subscription_size'] = int(subscription.size)
+    returnValues['future_subscription_size'] = int(calculate_future_size(subscription))
     return render(request, 'subscription_content.html',returnValues)
-def is_subscription_content_valid(subscription,product,productAmount):
-    currentProductContent = SubscriptionContent.objects.filter(subscription=subscription.id)
-    maxSize = int(subscription.size)
-    if not currentProductContent:
-        currentAmount = 0
-    else:
-        currentAmount = 0
-        for subContent in currentProductContent:
-            currentAmount+=subContent.amount * subContent.product.units
-    return maxSize<currentAmount+productAmount*product.units
+
+def new_content_valid(subscription,request,products):
+    totalUnits = 0
+    for product in products:
+        productAmount = int(request.POST.get("amount"+str(product.id)))
+        if(productAmount<0):
+            return(False,"Mengen unter Null sind nicht erlaubt")
+        totalUnits += productAmount * product.units
+    if(totalUnits>int(calculate_future_size(subscription))):
+        return(False,"Dein Abo hat nicht genug Platz für alle Produkte")
+    return (True,"")
+
+def calculate_future_size(subscription):
+    result = 0
+    for type in subscription.future_types.all():
+        result += type.size.units
+    return result
