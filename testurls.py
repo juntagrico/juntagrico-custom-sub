@@ -1,5 +1,5 @@
 """
-test URL Configuration for juntagico_custom_sub development
+test URL Configuration for juntagrico_custom_sub development
 """
 from django.conf.urls import include, url
 from django.contrib import admin
