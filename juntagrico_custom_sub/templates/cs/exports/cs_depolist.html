@@ -1,0 +1,39 @@
+{% load config %}
+{% load i18n %}
+{% vocabulary "depot" as v_depot %}
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        .page-break {
+            page-break-after: always;
+        }
+        .depot-table th {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    {% for depot in depots %}
+    <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
+    <table class="depot-table">
+        <th>{% vocabulary "subscription" %}</th>
+        {% for product in products %}
+        <th>{{product.name}}</th>
+        {% endfor %}
+        {% for sub in depot.subscription_cache.all %}
+        <tr>
+            <td>{{ sub.primary_member.get_name}}</td>
+            {% for amount in sub.content.amounts_for_products %}
+            <td>{% if amount != 0 %} {{amount}} {% endif %}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="page-break"></div>
+    {% endfor %}
+</body>
+
+</html>

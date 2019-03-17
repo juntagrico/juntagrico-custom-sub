@@ -8,6 +8,9 @@ class SubItemsInline(admin.TabularInline):
 class FutureSubItemsInline(admin.TabularInline):
     model = SubscriptionContentFutureItem
 
+class MandatoryProductInline(admin.TabularInline):
+    model = Product.mandatory_for_sizes.through
+
 class SubscriptionContentAdmin(admin.ModelAdmin):
     inlines = [
         SubItemsInline,FutureSubItemsInline

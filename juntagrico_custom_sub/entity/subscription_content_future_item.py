@@ -3,7 +3,7 @@ from juntagrico_custom_sub.entity.subscription_content import SubscriptionConten
 from juntagrico_custom_sub.entity.product import Product
 
 class SubscriptionContentFutureItem(models.Model):
-    subscription_content = models.ForeignKey(SubscriptionContent,on_delete=models.CASCADE,related_name="future_contents")
+    subscription_content = models.ForeignKey(SubscriptionContent,on_delete=models.CASCADE,related_name="future_products")
     product = models.ForeignKey(Product,on_delete=models.PROTECT)
     amount = models.IntegerField()
     @property
