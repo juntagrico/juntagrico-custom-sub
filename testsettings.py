@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'juntagrico',
-    'juntagrico_bookkeeping',
+    'juntagrico_custom_sub',
 ]
 
 DATABASES = {

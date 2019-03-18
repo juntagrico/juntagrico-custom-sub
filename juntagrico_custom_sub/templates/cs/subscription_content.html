@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load config %}
+{% load cs_config %}
+{% block page_title %}
+{% load staticfiles %}
+<h3>{% vocabulary "subscription" %} Zusammenstellung</h3>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
+{% if saved %}
+<div class="alert alert-success" role="alert">Der Inhalt deines {% vocabulary "subscription" %}s wurde gespeichert.
+    <br />
+    <a href="/my/subscription/detail/{{ subscription.id }}/">
+        Zurück zur {% vocabulary "subscription" %}-Übersicht
+</div>
+{% else %}
+<p>Dein {{ future_subscription_size }} {% cs_vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende
+    Produkte:</p>
+<p id="remainingUnits"></p>
+<form method="post" action=""> {% csrf_token %}
+    <table>
+        {% for product in products %}
+            <tr {% if product.amount_in_subscription == 0 and not product.user_editable %} style="display: none" {% endif %}>
+                <td>
+                    <div>{{ product.display_units }} {{ product.unit_name }} {{ product.name }}</div>
+                    <small>entspricht {{ product.units }} {% cs_vocabulary "base_unit" %}</small>
+                </td>
+                <td>
+                    <button class="btn btn-decrement" id="removeProduct{{ product.id }}" type=button
+                        {% if not product.user_editable %} disabled {% endif %}>-</button>
+                </td>
+                <td><input type="number" value="{{ product.amount_in_subscription}}" min=0 name="amount{{ product.id }}"
+                        id="valueProduct{{ product.id }}" style="text-align: center;" readonly></input></td>
+                <td>
+                    <button class="btn btn-increment" id="addProduct{{ product.id }}" type=button {% if not product.user_editable %}
+                        disabled {% endif %}>+</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <button class="btn btn-success" type="submit" name="saveContent">Aboinhalt speichern</button>
+</form>
+<script type='text/javascript'>
+    window.onload = function () {
+        calculateRemainingUnits();
+        var contentLeft = '{{ subscription_remaining }}';
+        {% for product in products %}
+        $('#addProduct{{ product.id }}').click(function () {
+            var oldVal = +$('#valueProduct{{ product.id }}').val();
+            if (getTotalUsedUnits() + {{ product.units }} <= {{ future_subscription_size }})
+            {
+                $('#valueProduct{{ product.id }}').val(oldVal + 1);
+            }
+            calculateRemainingUnits();
+        });
+    $('#removeProduct{{ product.id }}').click(function () {
+        var oldVal = +$('#valueProduct{{ product.id }}').val();
+        if (oldVal > 0 && oldVal > {{ product.min_amount }}) {
+            $('#valueProduct{{ product.id }}').val(oldVal - 1);
+            calculateRemainingUnits();
+        };
+    });
+    {% endfor %}
+    };
+    function calculateRemainingUnits() {
+        var remaining = {{ future_subscription_size }} - getTotalUsedUnits();
+        if (remaining == 0) {
+            $('#remainingUnits').hide();
+        }
+        else {
+            $('#remainingUnits').text("Noch " + remaining + " {% cs_vocabulary 'base_unit' %} zu verteilen");
+            $('#remainingUnits').show();
+        }
+    };
+
+    function getTotalUsedUnits() {
+        var totalUsed = 0;
+        {% for product in products %}
+            totalUsed += +$('#valueProduct{{ product.id }}').val() * {{ product.units }};
+        {% endfor %}
+    return totalUsed;
+    };
+</script>
+{% endif %}
+{% endblock %}
