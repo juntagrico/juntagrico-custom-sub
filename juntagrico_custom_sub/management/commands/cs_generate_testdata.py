@@ -34,33 +34,25 @@ class Command(BaseCommand):
         subsize1_fields = {'name': '4 Liter', 'long_name': '4 Liter Abo', 'units': 4, 'visible': True,
                           'depot_list': True, 'product': subproduct,
                           'description': '4 Liter Abo enthält Produkte die 4 Liter Milch entsprechen.'}
-        subsize2_fields = {'name': '6 Liter', 'long_name': '6 Liter Abo', 'units': 6, 'visible': True,
-                          'depot_list': True, 'product': subproduct,
-                          'description': '6 Liter Abo enthält Produkte die 6 Liter Milch entsprechen.'}
         subsize3_fields = {'name': '8 Liter', 'long_name': '8 Liter Abo', 'units': 8, 'visible': True,
                           'depot_list': True, 'product': subproduct,
                           'description': '8 Liter Abo enthält Produkte die 8 Liter Milch entsprechen.'}
-        subsize4_fields = {'name': '10 Liter', 'long_name': '10 Liter Abo', 'units': 10, 'visible': True,
+        subsize4_fields = {'name': '2 Liter', 'long_name': '2 Liter Abo', 'units': 2, 'visible': True,
                           'depot_list': True, 'product': subproduct,
-                          'description': '10 Liter Abo enthält Produkte die 10 Liter Milch entsprechen.'}                  
+                          'description': '2 Liter Abo enthält Produkte die 2 Liter Milch entsprechen.'}                  
         subsize1 = SubscriptionSize.objects.create(**subsize1_fields)
-        subsize2 = SubscriptionSize.objects.create(**subsize2_fields)
         subsize3 = SubscriptionSize.objects.create(**subsize3_fields)
         subsize4 = SubscriptionSize.objects.create(**subsize4_fields)
         subtrype1_fields = {'name': '4 Liter', 'long_name': '4 Liter Abo', 'size': subsize1, 'shares': 1,
                           'visible': True, 'required_assignments': 2, 'price': 650,
                           'description': '4 Liter Abo.'}
-        subtrype2_fields = {'name': '6 Liter', 'long_name': '6 Liter', 'size': subsize2, 'shares': 1,
-                          'visible': True, 'required_assignments': 3, 'price': 1000,
-                          'description': '6 Liter Abo.'}
         subtrype3_fields = {'name': '8 Liter', 'long_name': '8 Liter', 'size': subsize3, 'shares': 2,
                           'visible': True, 'required_assignments': 4, 'price': 1200,
                           'description': '8 Liter Abo.'}
-        subtrype4_fields = {'name': '10 Liter', 'long_name': '10 Liter', 'size': subsize4, 'shares': 2,
-                          'visible': True, 'required_assignments': 5, 'price': 1400,
-                          'description': '10 Liter Abo.'}
+        subtrype4_fields = {'name': '2 Liter', 'long_name': '2 Liter', 'size': subsize4, 'shares': 0,
+                          'visible': True, 'required_assignments': 1, 'price': 300,
+                          'description': '2 Liter Abo.'}
         subtype1 = SubscriptionType.objects.create(**subtrype1_fields)
-        subtype2 = SubscriptionType.objects.create(**subtrype2_fields)
         subtype3 = SubscriptionType.objects.create(**subtrype3_fields)
         subtype4 = SubscriptionType.objects.create(**subtrype4_fields)
         depot1_fields = {'code': 'D1', 'name': 'Toblerplatz', 'weekday': 2, 'latitude': '47.379308',
@@ -98,9 +90,9 @@ class Command(BaseCommand):
         area_2 = ActivityArea.objects.create(**area2_fields)
         area_2.members.set([member_1])
         area_2.save()
-        type1_fields = {'name': 'Ernten', 'displayed_name': '', 'description': 'the real deal', 'activityarea': area_1,
+        type1_fields = {'name': 'Abpacken', 'displayed_name': '', 'description': 'the real deal', 'activityarea': area_1,
                         'duration': 2, 'location': 'auf dem Hof'}
-        type2_fields = {'name': 'Jäten', 'displayed_name': '', 'description': 'the real deal', 'activityarea': area_2,
+        type2_fields = {'name': 'Ausfahren', 'displayed_name': '', 'description': 'the real deal', 'activityarea': area_2,
                         'duration': 2, 'location': 'auf dem Hof'}
         type_1 = JobType.objects.create(**type1_fields)
         type_2 = JobType.objects.create(**type2_fields)
@@ -140,13 +132,9 @@ class Command(BaseCommand):
         wochenkase_gross = Product.objects.create(**prod7_fields)
 
         mandatory1_fields = {'subscription_size': subsize1, 'product': wochenkase_klein, 'amount': 1}
-        mandatory2_fields = {'subscription_size': subsize2, 'product': wochenkase_klein, 'amount': 1}
         mandatory3_fields = {'subscription_size': subsize3, 'product': wochenkase_gross, 'amount': 1}
-        mandatory4_fields = {'subscription_size': subsize4, 'product': wochenkase_gross, 'amount': 1}
         SubscriptionSizeMandatoryProducts.objects.create(**mandatory1_fields)
-        SubscriptionSizeMandatoryProducts.objects.create(**mandatory2_fields)
         SubscriptionSizeMandatoryProducts.objects.create(**mandatory3_fields)
-        SubscriptionSizeMandatoryProducts.objects.create(**mandatory4_fields)
 
         subcontent1_fields = {'subscription':subscription_1}
         subcontent2_fields = {'subscription':subscription_2}

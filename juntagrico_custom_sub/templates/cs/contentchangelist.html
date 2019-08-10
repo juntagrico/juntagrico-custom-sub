@@ -1,0 +1,68 @@
+{% extends "management_lists/man_list_base.html" %}
+{% load i18n %}
+{% load config %}
+{% block page_title %}
+    <h3>
+        {% trans "Inhalt Änderungsliste" %}
+    </h3>
+{% endblock %}
+{% block list %}
+    <table id="filter-table" class="list table" style="display: table;">
+        <thead>
+            <tr>
+                <th class="filter">
+                    {% vocabulary "subscription" %}
+                </th>
+                <th class="filter">
+                    {% trans "Kontakt" %}
+                </th>
+                <th class="filter">
+                    {% trans "Email" %}
+                </th>
+                <th class="filter">
+                    {% trans "Aktueller Inhalt" %}
+                </th>
+                <th class="filter">
+                    {% trans "Zukünftiger Inhalt" %}
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in management_list %}
+                <tr>
+                    <td>
+                        <a href="/admin/juntagrico/subscription/{{ subscription.id }}/change/">
+                            {{ subscription.overview }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ subscription.primary_member.first_name }} {{ subscription.primary_member.last_name }}
+                    </td>
+                    <td>
+                        <form id="subscription{{ subscription.id }}" method="post" action="/my/mails">
+                            {% csrf_token %}
+                            <input type="hidden" name="recipients"value="{{ subscription.primary_member.email }}"/>
+                            <input type="hidden"name="recipients_count"value="1"/>
+                            <a href="#"onclick="$('#subscription{{ subscription.id }}').submit();" class="email">
+                                {{ subscription.primary_member.email }}
+                            </a>
+                        </form>
+                    </td>
+                    <td>
+                        {{ subscription.content.display_content|join:"<br/>" }}
+                    </td>
+                    <td>
+                        {{ subscription.content.display_future_content|join:"<br/>" }}
+                    </td>
+                    <td>
+                        <a href="/cs/content/change/{{ subscription.id }}/" class="btn btn-success">
+                            {% trans "ändern" %}
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

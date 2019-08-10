@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load config %}
+<div class="row">
+    <div class="col-md-3">
+        {% trans "Inhalt" %}
+    </div>
+    <div class="col-md-9">
+        {% for content in subscription.content.display_content %}
+            <p>{{ content }}</p>
+        {% endfor %}
+    </div>
+</div>

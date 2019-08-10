@@ -1,0 +1,27 @@
+{% load i18n %}
+{% load config %}
+<div class="row mt-3">
+    <div class="col-md-2">
+        {% trans "Inhalt" %}
+    </div>
+    <div class="col-md-4">
+        {% trans "Deine Bedürfnisse haben sich geändert und du möchtest die Zusammenstellung deines Abos ändern?" %}
+        {% trans "Du kannst diese jederzeit ändern - die Änderung werden zwei mal jahrlich jeweils im Sommer und im Winter aktiv." %}
+    </div>
+    <div class="col-md-4">
+        {% trans "Nächstmögliches Datum" %}:
+        <br/>
+        {{ next_business_year |date:"d.m.Y" }}
+        <br/>
+        {% trans "Zukünftig" %}:
+        <br/>
+        {% for content in subscription.content.display_future_content %}
+            {{ content }}<br/>
+        {% endfor %}
+    </div>
+    <div class="col-md-2">
+        <a href="/cs/subscription/change/content/{{ subscription.id }}/" class="btn btn-success">
+            {% blocktrans %}Inhalt ändern{% endblocktrans %}
+        </a>
+    </div>
+</div>

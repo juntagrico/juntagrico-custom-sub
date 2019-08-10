@@ -1,15 +1,21 @@
 from django.contrib.auth.decorators import login_required
 
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render,get_object_or_404,redirect
 from django.http import HttpResponseRedirect
 from juntagrico_custom_sub.models import *
 from juntagrico.models import *
-
+from juntagrico.views import get_menu_dict
+from juntagrico.util.management_list import get_changedate
+from juntagrico.util import return_to_previous_location
+from juntagrico.dao.subscriptiondao import SubscriptionDao
+from juntagrico.util.views_admin import subscription_management_list
+from juntagrico_custom_sub.util.sub_content import new_content_valid,calculate_future_size,calculate_current_size
 import logging
 
 logger = logging.getLogger(__name__)
 
-def subscription_content(request,subscription_id=None):
+def subscription_content_edit(request,subscription_id=None):
     returnValues = dict()
     member = request.user.member
     if subscription_id is None:
@@ -50,29 +56,26 @@ def subscription_content(request,subscription_id=None):
 
     returnValues['subscription'] = subscription
     returnValues['products'] = products
-    returnValues['subscription_size'] = int(subscription.size)
+    returnValues['subscription_size'] = int(calculate_current_size(subscription))
     returnValues['future_subscription_size'] = int(calculate_future_size(subscription))
-    return render(request, 'cs/subscription_content.html',returnValues)
+    return render(request, 'cs/subscription_content_edit.html',returnValues)
 
-def new_content_valid(subscription,request,products):
-    totalUnits = 0
-    for product in products:
-        minimalAmountForProduct = 0
-        for type in subscription.future_types.all():
-            for mandatoryProduct in SubscriptionSizeMandatoryProducts.objects.filter(product=product,subscription_size=type.size):
-                minimalAmountForProduct+=mandatoryProduct.amount
-        productAmount = int(request.POST.get("amount"+str(product.id)))
-        if(productAmount<0):
-            return(False,"Mengen unter Null sind nicht erlaubt")
-        if(productAmount<minimalAmountForProduct):
-            return(False,"Mindestens "+str(minimalAmountForProduct) +" "+product.name+" benötigt")
-        totalUnits += productAmount * product.units
-    if(totalUnits>int(calculate_future_size(subscription))):
-        return(False,"Dein Abo hat nicht genug Platz für alle Produkte")
-    return (True,"")
+@permission_required('juntagrico.is_operations_group')
+def contentchangelist(request,subscription_id=None):
+    render_dict = get_menu_dict(request)
+    render_dict.update(get_changedate(request))
+    changedlist = []
+    subscriptions_list = SubscriptionDao.all_active_subscritions()
+    for subscription in subscriptions_list:
+        if subscription.content.content_changed:
+            changedlist.append(subscription)
+    return subscription_management_list(changedlist,render_dict, 'cs/contentchangelist.html',request)
 
-def calculate_future_size(subscription):
-    result = 0
-    for type in subscription.future_types.all():
-        result += type.size.units
-    return result
+@permission_required('juntagrico.is_operations_group')
+def activate_future_content(request, subscription_id):
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    for content in subscription.content.products.all():
+        content.delete()
+    for content in subscription.content.future_products.all():
+        SubscriptionContentItem.objects.create(subscription_content=subscription.content,amount=content.amount,product=content.product)
+    return return_to_previous_location(request)
