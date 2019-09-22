@@ -2,6 +2,7 @@ from django.db import models
 from juntagrico.models import Subscription
 from juntagrico_custom_sub.entity.product import Product
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
 
 class SubscriptionContent(models.Model):
     subscription = models.OneToOneField(Subscription,on_delete=models.CASCADE,related_name="content")
@@ -63,3 +64,6 @@ class SubscriptionContent(models.Model):
                 changed = True
                 break
         return changed
+    class Meta:
+        verbose_name = _('Abo Inhalt')
+        verbose_name_plural = _('Abo Inhalte')
