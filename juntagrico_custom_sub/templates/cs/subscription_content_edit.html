@@ -42,7 +42,7 @@
             </tr>
         {% endfor %}
     </table>
-    <button class="btn btn-success" type="submit" name="saveContent">Aboinhalt speichern</button>
+    <button id="formSubmit" class="btn btn-success" type="submit" name="saveContent">Aboinhalt speichern</button>
 </form>
 {% localize off %}
 <script type='text/javascript'>
@@ -69,6 +69,7 @@
     };
     function calculateRemainingUnits() {
         var remaining = {{ future_subscription_size }} - getTotalUsedUnits();
+        $("#formSubmit").attr("disabled", remaining != 0);
         if (remaining == 0) {
             $('#remainingUnits').hide();
         }
