@@ -4,6 +4,7 @@
 {% load cs_config %}
 {% block page_title %}
 {% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'juntagrico_custom_sub/style.css' %}">
 <h3>{% vocabulary "subscription" %} Zusammenstellung</h3>
 {% endblock %}
 
@@ -29,15 +30,25 @@
                     <div>{{ product.display_units }} {{ product.unit_name }} {{ product.name }}</div>
                     <small>entspricht {{ product.units }} {% cs_vocabulary "base_unit" %}</small>
                 </td>
-                <td>
-                    <button class="btn btn-decrement" id="removeProduct{{ product.id }}" type=button
-                        {% if not product.user_editable %} disabled {% endif %}>-</button>
+                <td >
+                    <div class="pflichtprod">
+                        {% if not product.user_editable %}
+                            <span class="alert alert-warning">Pflichtprodukt - Ändern nicht möglich</span>
+                        {% endif %}
+                        <button class="btn btn-decrement" id="removeProduct{{ product.id }}" type=button
+                            {% if not product.user_editable %} disabled {% endif %}>-</button>
+                    </div>
                 </td>
                 <td><input type="number" value="{{ product.amount_in_subscription}}" min=0 name="amount{{ product.id }}"
                         id="valueProduct{{ product.id }}" style="text-align: center;" readonly></input></td>
                 <td>
-                    <button class="btn btn-increment" id="addProduct{{ product.id }}" type=button {% if not product.user_editable %}
-                        disabled {% endif %}>+</button>
+                    <div class="pflichtprod">
+                        {% if not product.user_editable %}
+                            <span class="alert alert-warning">Pflichtprodukt - Ändern nicht möglich</span>
+                        {% endif %}
+                        <button class="btn btn-increment" id="addProduct{{ product.id }}" type=button
+                            {% if not product.user_editable %} disabled {% endif %}>+</button>
+                    </div>
                 </td>
             </tr>
         {% endfor %}

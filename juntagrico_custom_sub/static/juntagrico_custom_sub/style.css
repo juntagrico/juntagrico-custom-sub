@@ -1,0 +1,16 @@
+.pflichtprod:hover {
+    position: relative
+}
+.pflichtprod span{
+    display: none
+}
+.pflichtprod:hover span {
+    padding: 0.1rem;
+    display: block;
+    position: absolute;
+    z-index: 100;
+    text-align: center;
+    width: 14rem;
+    top: -4rem;
+    left: -4rem;
+}
