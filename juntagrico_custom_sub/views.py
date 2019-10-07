@@ -20,11 +20,13 @@ logger = logging.getLogger(__name__)
 @primary_member_of_subscription
 def subscription_content_edit(request, subscription_id=None):
     returnValues = dict()
-    member = request.user.member
-    if subscription_id is None:
-        subscription = member.subscription
-    else:
-        subscription = get_object_or_404(Subscription, id=subscription_id)
+    # subscription_id cannot be none --> route not defined
+    # member = request.user.member
+    # if subscription_id is None:
+    #     subscription = member.subscription
+    # else:
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    # subscription content should always exists in this view --> no try, exist?
     try:
         subContent = SubscriptionContent.objects.get(subscription=subscription)
     except SubscriptionContent.DoesNotExist:
@@ -53,19 +55,15 @@ def subscription_content_edit(request, subscription_id=None):
             returnValues['saved'] = True
         else:
             returnValues['error'] = error
+    subs_sizes = count_subs_sizes(subscription.future_types.all())
     for prod in products:
-        try:
-            subItem = SubscriptionContentFutureItem.objects.get(subscription_content=subContent.id, product=prod)
-            prod.amount_in_subscription = subItem.amount
-        except SubscriptionContentFutureItem.DoesNotExist:
-            prod.amount_in_subscription = 0
-        for type in subscription.future_types.all():
-            if(SubscriptionSizeMandatoryProducts.objects.filter(product=prod, subscription_size=type.size).exists()):
-                prod.min_amount = SubscriptionSizeMandatoryProducts.objects.get(
-                    product=prod, subscription_size=type.size
-                    ).amount
-            else:
-                prod.min_amount = 0
+        sub_item = SubscriptionContentFutureItem.objects.filter(
+            subscription_content=subContent.id, product=prod
+            ).first()
+        chosen_amount = 0 if not sub_item else sub_item.amount
+        min_amount = determine_min_amount(prod, subs_sizes)
+        prod.min_amount = min(min_amount, chosen_amount)
+        prod.amount_in_subscription = max(chosen_amount, min_amount)
 
     returnValues['subscription'] = subscription
     returnValues['products'] = products
@@ -82,14 +80,9 @@ def custom_sub_initial_select(request, cs_session):
         cs_session.custom_prod = custom_prod
         return redirect(cs_session.next_page())
     products = Product.objects.all().order_by('user_editable')
-    s_sizes = {t.size: a for t, a in cs_session.subscriptions.items() if a > 0}
+    subs_sizes = {t.size: a for t, a in cs_session.subscriptions.items() if a > 0}
     for p in products:
-        for size, count in s_sizes.items():
-            mand_prod = SubscriptionSizeMandatoryProducts.objects.filter(product=p, subscription_size=size).first()
-            if hasattr(p, 'min_amount'):  # in a previous iteration, min amount has been defined, add to it for current size
-                p.min_amount = p.min_amount if not mand_prod else p.min_amount + mand_prod.amount * count
-            else:
-                p.min_amount = 0 if not mand_prod else mand_prod.amount * count
+        p.min_amount = determine_min_amount(p, subs_sizes)
         p.amount_in_subscription = p.min_amount
 
     returnValues = {}
@@ -97,6 +90,50 @@ def custom_sub_initial_select(request, cs_session):
     returnValues['subscription_size'] = int(cs_session.subscription_size())
     returnValues['future_subscription_size'] = int(cs_session.subscription_size())
     return render(request, 'cs/subscription_content_edit.html', returnValues)
+
+
+def add_products_to_subscription(subscription_id, custom_products):
+    """
+    adds custom products to the subscription with the given id.
+    custom_prodducts is a dictionary with the product object as keys and their
+    amount as value.
+    """
+    content = SubscriptionContent(subscription_id=subscription_id)
+    content.save()
+    selected_items = {
+        p: a for p, a in custom_products.items() if a != 0
+        }
+    for prod, amount in selected_items.items():
+        item = SubscriptionContentItem(
+            amount=amount,
+            product_id=prod.id,
+            subscription_content_id=content.id
+            )
+        item.save()
+
+
+def determine_min_amount(product, subs_sizes):
+    '''
+    Given a product and a dictionary of subscription sizes, return the minimum (mandatory) amount.
+    Allows for situations where a product can be mandatory for more than one size.
+    Example of subs_sizes: {size_1: amount_1, size_2: amount_2, etc...}
+    '''
+    min_amount = 0
+    for size, count in subs_sizes.items():
+        mand_prod = SubscriptionSizeMandatoryProducts.objects.filter(product=product, subscription_size=size).first()
+        if mand_prod:
+            min_amount += mand_prod.amount * count
+    return min_amount
+
+
+def count_subs_sizes(subs_types):
+    rv = {}
+    for st in subs_types:
+        if st.size.id not in rv:
+            rv[st.size.id] = 1
+        else:
+            rv[st.size.id] += 1
+    return rv
 
 
 def selected_custom_products(post_data):
