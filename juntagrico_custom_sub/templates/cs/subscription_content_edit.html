@@ -9,16 +9,6 @@
 {% endblock %}
 
 {% block content %}
-{% if error %}
-<div class="alert alert-danger" role="alert">{{ error }}</div>
-{% endif %}
-{% if saved %}
-<div class="alert alert-success" role="alert">Der Inhalt deines {% vocabulary "subscription" %}s wurde gespeichert.
-    <br />
-    <a href="/my/subscription/detail/{{ subscription.id }}/">
-        Zurück zur {% vocabulary "subscription" %}-Übersicht
-</div>
-{% else %}
 <p>Dein {{ future_subscription_size }} {% cs_vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende
     Produkte:</p>
 <p id="remainingUnits"></p>
@@ -99,5 +89,4 @@
     };
 </script>
 {% endlocalize %}
-{% endif %}
 {% endblock %}

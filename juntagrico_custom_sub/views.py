@@ -1,5 +1,5 @@
-from django.contrib.auth.decorators import permission_required
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import permission_required, login_required
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from juntagrico_custom_sub.models import (
     SubscriptionContent, SubscriptionContentFutureItem, SubscriptionSizeMandatoryProducts, Product,
     SubscriptionContentItem
@@ -52,9 +52,10 @@ def subscription_content_edit(request, subscription_id=None):
                     )
                 subItem.amount = request.POST.get("amount"+str(product.id), 0)
                 subItem.save()
-            returnValues['saved'] = True
+            q = '?saved'
         else:
-            returnValues['error'] = error
+            q = f'?error={error}'
+        return redirect(f"{reverse('content_edit_result')}{q}&subs_id={subscription_id}")
     subs_sizes = count_subs_sizes(subscription.future_types.all())
     for prod in products:
         sub_item = SubscriptionContentFutureItem.objects.filter(
@@ -70,6 +71,17 @@ def subscription_content_edit(request, subscription_id=None):
     returnValues['subscription_size'] = int(calculate_current_size(subscription))
     returnValues['future_subscription_size'] = int(calculate_future_size(subscription))
     return render(request, 'cs/subscription_content_edit.html', returnValues)
+
+
+@login_required
+def content_edit_result(request, subscription_id=None):
+    rv = {}
+    if 'saved' in request.GET:
+        rv['saved'] = True
+    elif 'error' in request.GET:
+        rv['error'] = request.GET.get('error')
+    rv['subs_id'] = request.GET.get('subs_id')
+    return render(request, 'cs/content_edit_result.html', rv)
 
 
 @create_subscription_session
