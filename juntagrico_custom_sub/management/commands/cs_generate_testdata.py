@@ -2,9 +2,10 @@
 
 from django.core.management.base import BaseCommand
 
-from django.utils import timzone as tz
+from django import utils
 from juntagrico import models as jm
 from juntagrico_custom_sub import models as csm
+import pytz  # noqa --> not importing creates naive time objects
 
 
 class Command(BaseCommand):
@@ -221,27 +222,29 @@ class Command(BaseCommand):
         type_2 = jm.JobType.objects.create(**type2_fields)
         job1_all_fields = {
             "slots": 10,
-            "time": tz.timezone.now(),
+            "time": utils.timezone.now(),
             "pinned": False,
             "reminder_sent": False,
             "canceled": False,
             "type": type_1,
         }
         for x in range(0, 10):
-            job1_all_fields["time"] += tz.timezone.timedelta(days=7)
-            jm.RecuringJob.objects.create(**job1_all_fields)
+            delta = utils.timezone.timedelta(days=7)
+            job1_all_fields["time"] += delta
+            jm.RecuringJob.objects.create(**job1_all_fields)  # warning
 
         job2_all_fields = {
             "slots": 10,
-            "time": tz.timezone.now(),
+            "time": utils.timezone.now(),
             "pinned": False,
             "reminder_sent": False,
             "canceled": False,
             "type": type_2,
         }
         for x in range(0, 10):
-            job1_all_fields["time"] += tz.timezone.timedelta(days=7)
-            jm.RecuringJob.objects.create(**job2_all_fields)
+            delta = utils.timezone.timedelta(days=7)
+            job1_all_fields["time"] += delta
+            jm.RecuringJob.objects.create(**job2_all_fields)  # warning
 
         # CS specific
         prod1_fields = {
@@ -329,3 +332,36 @@ class Command(BaseCommand):
 
         csm.SubscriptionContentFutureItem.objects.create(**subcontentitem1_fields)
         csm.SubscriptionContentFutureItem.objects.create(**subcontentitem2_fields)
+
+        # add extra subscriptions (Zusatzabos)
+        extra_sub_cat1 = jm.ExtraSubscriptionCategory.objects.create(
+            name="Spezialkäse",
+            description="Spezialkäse für Waghalsige Käseliebhaber",
+            sort_order=1,
+            visible=True,
+        )
+        extra_sub_type1 = jm.ExtraSubscriptionType.objects.create(
+            name="Spezialkäse Einheitsgrösse",
+            size="Einheitsgrösse",
+            description="Einmal pro Monat Überraschunskäse",
+            sort_order=1,
+            category_id=extra_sub_cat1.id,
+            visible=True,
+        )
+        jm.ExtraSubBillingPeriod.objects.create(
+            start_day=1,
+            start_month=1,
+            end_day=31,
+            end_month=12,
+            type_id=extra_sub_type1.id,
+            cancel_day=30,
+            cancel_month=9,
+            price=120,
+        )
+        jm.ExtraSubscription.objects.create(
+            active=True,
+            canceled=False,
+            activation_date=utils.timezone.now(),
+            main_subscription_id=subscription_1.id,
+            type_id=extra_sub_type1.id,
+        )
