@@ -6,11 +6,39 @@
 <head>
     <meta charset="utf-8">
     <style>
+        @page {
+            size: a4 landscape;
+            @frame content_frame {
+                left: 50pt;
+                width: 742pt;
+                top: 50pt;
+                height: 495pt;
+            }
+        }
+        body {
+            font-size: 12pt;
+        }
         .page-break {
             page-break-after: always;
         }
-        .depot-table th {
+        .depot-table td.name{
             text-align: left;
+            padding-left: 0.2em;
+        }
+        .depot-table th.name {
+            text-align: left;
+            padding-left: 0.2em;
+        }
+        .depot-table th.name {
+            text-align: center;
+        }
+        .depot-table td {
+            text-align: center; 
+            border: 1px solid black;
+            padding-top: 0.4em;
+        }
+        .depot-table td .even{
+            background-color: #7aaae0;
         }
     </style>
 </head>
@@ -19,16 +47,18 @@
     {% for depot in depots %}
     <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
     <table class="depot-table">
-        <th>{% vocabulary "subscription" %}</th>
+        <th class="name">{% vocabulary "subscription" %}</th>
         {% for product in products %}
         <th>{{product.name}}</th>
         {% endfor %}
+        <th>Abo abgeholt</th>
         {% for sub in depot.subscription_cache.all %}
         <tr>
-            <td>{{ sub.primary_member.get_name}}</td>
+            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.get_name}}</td>
             {% for amount in sub.content.amounts_for_products %}
-            <td>{% if amount != 0 %} {{amount}} {% endif %}</td>
+            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">{% if amount != 0 %} <span> {{amount}} </span> {% endif %}</td>
             {% endfor %}
+            <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
         </tr>
         {% endfor %}
     </table>

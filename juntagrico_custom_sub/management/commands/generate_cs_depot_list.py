@@ -2,11 +2,32 @@ from django.core.management.base import BaseCommand
 from juntagrico.util.pdf import render_to_pdf_storage
 from juntagrico_custom_sub.models import *
 from juntagrico.models import *
+from juntagrico.dao.depotdao import DepotDao
+
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        # Named (optional) arguments
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            dest='force',
+            default=False,
+            help='force generation of depot list',
+    )
     def handle(self, *args, **options):
-        depots = Depot.objects.all().order_by('code')
+        if not options['force'] and timezone.now().weekday() not in Config.depot_list_generation_days():
+            print(
+                'not the specified day for depot list generation, use --force to override')
+            return
+        depots = DepotDao.all_depots_order_by_code()
         products = Product.objects.all().order_by('id')
+        latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
+
+        #Rename products based on their name in the latest delivery
+        for product in products:
+            if latest_delivery.items.filter(product=product):
+                product.name = latest_delivery.items.get(product=product).name
         for depot in depots:
             depot.fill_overview_cache()
             depot.fill_active_subscription_cache()
