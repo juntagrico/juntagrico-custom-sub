@@ -266,13 +266,13 @@ class Command(BaseCommand):
             "unit_name": "Gramm",
         }
         prod4_fields = {
-            "name": "Fruchtyogurt",
+            "name": "Fruchtjoghurt",
             "units": 1,
             "unit_multiplier": 1,
             "unit_name": "Kilo",
         }
         prod5_fields = {
-            "name": "Natureyogurt",
+            "name": "Naturejoghurt",
             "units": 1,
             "unit_multiplier": 1,
             "unit_name": "Kilo",
