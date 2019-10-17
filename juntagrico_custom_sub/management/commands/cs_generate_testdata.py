@@ -58,7 +58,7 @@ class Command(BaseCommand):
         share_all_fields["member"] = member_2
         jm.Share.objects.create(**share_all_fields)
         jm.Share.objects.create(**share_all_fields)
-        subprod_fields = {"name": "Milch"}
+        subprod_fields = {"name": "Rohmilch"}
         subproduct = jm.SubscriptionProduct.objects.create(**subprod_fields)
         subsize1_fields = {
             "name": "4 Liter",
@@ -248,7 +248,7 @@ class Command(BaseCommand):
 
         # CS specific
         prod1_fields = {
-            "name": "Milch",
+            "name": "Rohmilch",
             "units": 1,
             "unit_multiplier": 1,
             "unit_name": "Liter",
