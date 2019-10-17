@@ -52,7 +52,7 @@ class Command(BaseCommand):
         for f in options['files']:
             table_name = os.path.basename(f).split('.')[0]
             table = self.name_to_model(table_name)
-            with open(f, newline='') as csvfile:
+            with open(f, newline='', encoding="utf-8-sig") as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     row = self.resolve_foreign_keys(row)

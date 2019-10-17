@@ -42,14 +42,14 @@ class Command(BaseCommand):
 
         for f in options['files']:
             dir_name = os.path.dirname(os.path.abspath(f))
-            out_file_name = os.path.join(dir_name, 'SubscriptionItem.csv')
+            out_file_name = os.path.join(dir_name, 'SubscriptionContentItem.csv')
             out_file = open(out_file_name, 'w', newline='')
-            with open(f, newline='') as csvfile:
+            with open(f, newline='', encoding='utf-8-sig') as csvfile:
                 reader = csv.DictReader(csvfile)
                 writer = csv.DictWriter(out_file, reader.fieldnames)
                 writer.writeheader()
                 for row in reader:
                     rows = self.clean_row(row)
                     for r in rows:
-                        writer.writerow(row)
+                        writer.writerow(r)
             out_file.close()
