@@ -1,0 +1,78 @@
+{% load config %}
+{% load i18n %}
+{% vocabulary "depot" as v_depot %}
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: a4 landscape;
+
+            @frame content_frame {
+                left: 50pt;
+                width: 742pt;
+                top: 50pt;
+                height: 495pt;
+            }
+        }
+
+        body {
+            font-size: 12pt;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .depot-table td.name {
+            text-align: left;
+            padding-left: 0.2em;
+        }
+
+        .depot-table th.name {
+            text-align: left;
+            padding-left: 0.2em;
+        }
+
+        .depot-table th.name {
+            text-align: center;
+        }
+
+        .depot-table td {
+            text-align: center;
+            border: 1px solid black;
+            padding-top: 0.4em;
+        }
+
+        .depot-table td .even {
+            background-color: #7aaae0;
+        }
+    </style>
+</head>
+
+<body>
+    {% for weekday,depot_list in depots.items %}
+    <h2>{{ weekday }}</h2>
+    <table class="depot-table">
+        <th class="name">{% vocabulary "depot" %}</th>
+        {% for product in products %}
+        <th>{{product.name}}</th>
+        {% endfor %}
+        {% for depot_item in depot_list%}
+            {% for depot,depot_products in depot_item.items %}
+            <tr>
+                <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name}}</td>
+                {% for amount in depot_products %}
+                <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">{% if amount != 0 %} <span>
+                        {{amount}} </span> {% endif %}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+    <div class="page-break"></div>
+    {% endfor %}
+</body>
+
+</html>
