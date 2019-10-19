@@ -7,7 +7,7 @@ import juntagrico
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('juntagrico.urls')),
     url(r'^', include('juntagrico_custom_sub.urls')),
+    url(r'^', include('juntagrico.urls')),
     url(r'^$', juntagrico.views.home),
 ]

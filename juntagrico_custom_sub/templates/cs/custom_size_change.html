@@ -1,0 +1,35 @@
+{% extends "size_change.html" %}
+{% block content %}
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>} -->
+    <div class="modal" id="qnty-check" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Problem bei der Grössenauswahl</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>
+                  Du musst immer die grösstmögliche Abogrösse nehmen.
+                  Es ist zum Beispiel nicht möglich, 8 Liter auf zwei Vierliter-Abos aufzuteilen.
+                  4 Liter müssen mindestens im Abo sein.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{ block.super }}
+{% endblock %} -->
+{% block scripts %}
+    <script type="text/javascript" > 
+         window.onload = function () {
+            console.log("quantity error:", {{ quantity_error }});
+            if ({{ quantity_error }}) {
+                $("#qnty-check").modal();
+            }
+         }
+    </script>
+    {{ block.super }}
+{% endblock %}

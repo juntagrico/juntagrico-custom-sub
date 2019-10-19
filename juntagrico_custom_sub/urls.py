@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
+from django.urls import path
 from juntagrico_custom_sub import views
 
 urlpatterns = [
@@ -21,5 +22,6 @@ urlpatterns = [
     url('^cs/subscription/change/result/', views.content_edit_result, name='content_edit_result'),
     url('^cs/contentchangelist/', views.contentchangelist),
     url('^cs/signup/initialselect/', views.custom_sub_initial_select, name='custom_sub_initial_select'),
-    url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content)
+    url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),
+    path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
 ]

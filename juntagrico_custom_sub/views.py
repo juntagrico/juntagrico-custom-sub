@@ -1,20 +1,69 @@
-from django.contrib.auth.decorators import permission_required, login_required
-from django.shortcuts import render, get_object_or_404, redirect, reverse
-from juntagrico_custom_sub.models import (
-    SubscriptionContent, SubscriptionContentFutureItem, SubscriptionSizeMandatoryProducts, Product,
-    SubscriptionContentItem
-    )
-from juntagrico.models import Subscription
-from juntagrico.views import get_menu_dict
-from juntagrico.util.management_list import get_changedate
-from juntagrico.util import return_to_previous_location
-from juntagrico.dao.subscriptiondao import SubscriptionDao
-from juntagrico.util.views_admin import subscription_management_list
-from juntagrico_custom_sub.util.sub_content import new_content_valid, calculate_future_size, calculate_current_size
-from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
 import logging
 
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.utils import timezone
+from juntagrico import models as jm
+from juntagrico.config import Config
+from juntagrico.dao.subscriptiondao import SubscriptionDao
+from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
+from juntagrico.models import Subscription
+from juntagrico.util import return_to_previous_location, temporal
+from juntagrico.util.form_evaluation import selected_subscription_types
+from juntagrico.util.management import replace_subscription_types
+from juntagrico.util.management_list import get_changedate
+from juntagrico.util.views_admin import subscription_management_list
+from juntagrico.views import get_menu_dict
+
+from juntagrico_custom_sub.models import (
+    Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
+    SubscriptionSizeMandatoryProducts
+)
+from juntagrico_custom_sub.util.sub_content import calculate_current_size, calculate_future_size, new_content_valid
+
 logger = logging.getLogger(__name__)
+
+
+@primary_member_of_subscription
+def size_change(request, subscription_id):
+    """
+    change the size of a subscription
+    overwrites original method in juntagrico
+    implements stricter validation
+    """
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    saved = False
+    share_error = False
+    quantity_error = 0
+    if request.method == 'POST' and int(timezone.now().strftime('%m')) <= Config.business_year_cancelation_month():
+        # create dict with subscription type -> selected amount
+        selected = selected_subscription_types(request.POST)
+        total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
+        selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
+        selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
+        required8 = total_liters // 8
+        required4 = (total_liters % 8) // 4
+        # check if members of sub have enough shares
+        if subscription.all_shares < sum([sub_type.shares * amount for sub_type, amount in selected.items()]):
+            share_error = True
+        elif (total_liters >= 4 and selected8 == required8 and selected4 == required4):
+            replace_subscription_types(subscription, selected)
+            saved = True
+        else:
+            quantity_error = 1
+    products = jm.SubscriptionProduct.objects.all()
+    renderdict = get_menu_dict(request)
+    renderdict.update({
+        'saved': saved,
+        'subscription': subscription,
+        'quantity_error': quantity_error,
+        'shareerror': share_error,
+        'hours_used': Config.assignment_unit() == 'HOURS',
+        'next_cancel_date': temporal.next_cancelation_date(),
+        'selected_subscription': subscription.future_types.all()[0].id,
+        'products': products,
+    })
+    return render(request, 'cs/custom_size_change.html', renderdict)
 
 
 @primary_member_of_subscription
