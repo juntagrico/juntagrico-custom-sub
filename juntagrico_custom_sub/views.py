@@ -3,18 +3,21 @@ import logging
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.utils import timezone
+
+from juntagrico import mailer as ja_mailer
 from juntagrico import models as jm
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
 from juntagrico.models import Subscription
-from juntagrico.util import return_to_previous_location, temporal
+from juntagrico.util import management as ja_mgmt
+from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.form_evaluation import selected_subscription_types
 from juntagrico.util.management import replace_subscription_types
 from juntagrico.util.management_list import get_changedate
 from juntagrico.util.views_admin import subscription_management_list
 from juntagrico.views import get_menu_dict
-
+from juntagrico.views_create_subscription import CSSummaryView, cs_finish
 from juntagrico_custom_sub.models import (
     Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
     SubscriptionSizeMandatoryProducts
@@ -22,6 +25,75 @@ from juntagrico_custom_sub.models import (
 from juntagrico_custom_sub.util.sub_content import calculate_current_size, calculate_future_size, new_content_valid
 
 logger = logging.getLogger(__name__)
+
+
+########################################################################################################################
+# Monkey patching CSSessionObject
+#
+# Adds the custom product selectin to the signup process
+########################################################################################################################
+old_init = sessions.CSSessionObject.__init__
+
+
+def new_init(self):
+    old_init(self)
+    self.custom_prod = {}
+
+
+sessions.CSSessionObject.__init__ = new_init
+
+
+def new_next_page(self):
+    has_subs = self.subscription_size() > 0
+    if not self.subscriptions:
+        return 'cs-subscription'
+    elif has_subs and not self.custom_prod:
+        return 'custom_sub_initial_select'
+    elif has_subs and not self.depot:
+        return 'cs-depot'
+    elif has_subs and not self.start_date:
+        return 'cs-start'
+    elif has_subs and not self.co_members_done:
+        return 'cs-co-members'
+    elif not self.evaluate_ordered_shares():
+        return 'cs-shares'
+    return 'cs-summary'
+
+
+sessions.CSSessionObject.next_page = new_next_page
+
+
+########################################################################################################################
+class CustomCSSummaryView(CSSummaryView):
+    """
+    Custom summary view for custom products.
+    Overwrites post method to make sure custom products are added to the subscription
+    """
+    @staticmethod
+    def post(request, cs_session):
+        # create subscription
+        subscription = None
+        if sum(cs_session.subscriptions.values()) > 0:
+            subscription = ja_mgmt.create_subscription(
+                cs_session.start_date, cs_session.depot, cs_session.subscriptions
+                )
+
+        # create and/or add members to subscription and create their shares
+        ja_mgmt.create_or_update_member(cs_session.main_member, subscription, cs_session.main_member.new_shares)
+        for co_member in cs_session.co_members:
+            ja_mgmt.create_or_update_member(co_member, subscription, co_member.new_shares, cs_session.main_member)
+
+        # set primary member of subscription
+        if subscription is not None:
+            subscription.primary_member = cs_session.main_member
+            subscription.save()
+            ja_mailer.send_subscription_created_mail(subscription)
+
+        # associate custom products with subscription
+        if subscription is not None:
+            add_products_to_subscription(subscription.id, cs_session.custom_prod)
+        # finish registration
+        return cs_finish(request)
 
 
 @primary_member_of_subscription

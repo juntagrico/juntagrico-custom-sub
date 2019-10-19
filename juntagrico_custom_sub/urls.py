@@ -24,4 +24,5 @@ urlpatterns = [
     url('^cs/signup/initialselect/', views.custom_sub_initial_select, name='custom_sub_initial_select'),
     url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),
     path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
+    path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
 ]
