@@ -12,5 +12,7 @@ class SubscriptionContentItem(models.Model):
     @property
     def amount_base_units(self):
         return self.amount * self.product.units
+    def __lt__(self, other):
+        return self.product.pk < other.product.pk
     class Meta:
         unique_together = (("subscription_content", "product"),)

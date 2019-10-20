@@ -17,5 +17,7 @@ from django.conf.urls import url
 from juntagrico_custom_sub import views
 
 urlpatterns = [
-    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_content)
+    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_content_edit),
+    url('^cs/contentchangelist/', views.contentchangelist),
+    url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content)
 ]

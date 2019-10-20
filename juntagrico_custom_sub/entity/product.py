@@ -1,5 +1,6 @@
 from django.db import models
 from juntagrico.models import SubscriptionSize
+from django.utils.translation import gettext as _
 
 class Product(models.Model):
     name = models.CharField("Name",max_length=100)
@@ -14,3 +15,7 @@ class Product(models.Model):
         return int(self.unit_multiplier * self.units)
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = _('Produkt')
+        verbose_name_plural = _('Produkte')
