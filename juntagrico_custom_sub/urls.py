@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.urls import path
+
 from juntagrico_custom_sub import views
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),
     path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
     path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
+    path('my/create/subscription/', views.custom_cs_select_subscription, name='cs-subscription'),
 ]

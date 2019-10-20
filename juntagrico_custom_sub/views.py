@@ -9,7 +9,7 @@ from juntagrico import models as jm
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
-from juntagrico.models import Subscription
+from juntagrico.models import Subscription, SubscriptionProduct
 from juntagrico.util import management as ja_mgmt
 from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.form_evaluation import selected_subscription_types
@@ -96,6 +96,23 @@ class CustomCSSummaryView(CSSummaryView):
         return cs_finish(request)
 
 
+@create_subscription_session
+def custom_cs_select_subscription(request, cs_session):
+    if request.method == 'POST':
+        # create dict with subscription type -> selected amount
+        selected = selected_subscription_types(request.POST)
+        cs_session.subscriptions = selected
+        if (not quantity_error(selected)):
+            return redirect(cs_session.next_page())
+    render_dict = {
+        'quantity_error': False if not (request.method == 'POST') else quantity_error(selected),
+        'selected_subscriptions': cs_session.subscriptions,
+        'hours_used': Config.assignment_unit() == 'HOURS',
+        'products': SubscriptionProduct.objects.all(),
+    }
+    return render(request, 'cs/custom_select_subscription.html', render_dict)
+
+
 @primary_member_of_subscription
 def size_change(request, subscription_id):
     """
@@ -106,29 +123,21 @@ def size_change(request, subscription_id):
     subscription = get_object_or_404(Subscription, id=subscription_id)
     saved = False
     share_error = False
-    quantity_error = 0
     if request.method == 'POST' and int(timezone.now().strftime('%m')) <= Config.business_year_cancelation_month():
         # create dict with subscription type -> selected amount
         selected = selected_subscription_types(request.POST)
-        total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
-        selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
-        selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
-        required8 = total_liters // 8
-        required4 = (total_liters % 8) // 4
         # check if members of sub have enough shares
         if subscription.all_shares < sum([sub_type.shares * amount for sub_type, amount in selected.items()]):
             share_error = True
-        elif (total_liters >= 4 and selected8 == required8 and selected4 == required4):
+        elif (not quantity_error(selected)):
             replace_subscription_types(subscription, selected)
             saved = True
-        else:
-            quantity_error = 1
     products = jm.SubscriptionProduct.objects.all()
     renderdict = get_menu_dict(request)
     renderdict.update({
         'saved': saved,
         'subscription': subscription,
-        'quantity_error': quantity_error,
+        'quantity_error': quantity_error(selected) if (request.method == 'POST') else False,
         'shareerror': share_error,
         'hours_used': Config.assignment_unit() == 'HOURS',
         'next_cancel_date': temporal.next_cancelation_date(),
@@ -136,6 +145,21 @@ def size_change(request, subscription_id):
         'products': products,
     })
     return render(request, 'cs/custom_size_change.html', renderdict)
+
+
+def quantity_error(selected):
+    """
+    validates the selected quantities for Basimilch's usecase
+    selected is a dictionnary with SubscriptionType objects as keys and amounts as values
+    """
+    total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
+    if total_liters < 4:
+        return True
+    selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
+    selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
+    required8 = total_liters // 8
+    required4 = (total_liters % 8) // 4
+    return not(selected8 == required8 and selected4 == required4)
 
 
 @primary_member_of_subscription
