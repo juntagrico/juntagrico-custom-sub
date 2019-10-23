@@ -1,6 +1,7 @@
 import csv
 import os
 from django.core.management.base import BaseCommand
+from django.db import IntegrityError
 from juntagrico import models as jm
 from juntagrico_custom_sub import models as csm
 
@@ -56,4 +57,7 @@ class Command(BaseCommand):
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     row = self.resolve_foreign_keys(row)
-                    table.objects.update_or_create(**row)
+                    try:
+                        table.objects.update_or_create(**row)
+                    except IntegrityError:
+                        print(f'{row} already in DB')
