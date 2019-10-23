@@ -1,8 +1,8 @@
 <script type="text/javascript" > 
-    window.onload = function () {
-       quantity_error = "{{ quantity_error }}" === "True"
-       if (quantity_error) {
+    window.addEventListener("load",function(event) {
+        show_error_modal = "{{ error_modal }}" != ""
+        if (show_error_modal) {
            $("#qnty-check").modal();
-       }
-    }
+        }
+    });
 </script>

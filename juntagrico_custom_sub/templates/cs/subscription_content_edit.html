@@ -9,9 +9,10 @@
 {% endblock %}
 
 {% block content %}
+{% include "cs/snippets/size_error_modal.html" %}
 <p>Dein {{ future_subscription_size }} {% cs_vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende
     Produkte:</p>
-<p id="remainingUnits"></p>
+<p id="remainingUnits" style="visibility: hidden;">placeholder text</p>
 <form method="post" action=""> {% csrf_token %}
     <table>
         {% for product in products %}
@@ -46,6 +47,7 @@
     <button id="formSubmit" class="btn btn-success" type="submit" name="saveContent">Aboinhalt speichern</button>
 </form>
 {% localize off %}
+{% include "cs/snippets/size_error_js.html" %}
 <script type='text/javascript'>
     window.onload = function () {
         calculateRemainingUnits();
@@ -72,11 +74,14 @@
         var remaining = {{ future_subscription_size }} - getTotalUsedUnits();
         $("#formSubmit").attr("disabled", remaining != 0);
         if (remaining == 0) {
-            $('#remainingUnits').hide();
+            $('#remainingUnits').css("visibility", "hidden");
         }
-        else {
+        else if (remaining > 0) {
             $('#remainingUnits').text("Noch " + remaining + " {% cs_vocabulary 'base_unit' %} zu verteilen");
-            $('#remainingUnits').show();
+            $('#remainingUnits').css("visibility", "visible");
+        } else {
+            $('#remainingUnits').text("Dein Abo wurde kleiner. Bitte " + (-remaining) + " {% cs_vocabulary 'base_unit' %} entfernen.");
+            $('#remainingUnits').css("visibility", "visible");
         }
     };
 

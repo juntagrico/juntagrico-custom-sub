@@ -19,8 +19,8 @@ from django.urls import path
 from juntagrico_custom_sub import views
 
 urlpatterns = [
-    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_content_edit),
-    url('^cs/subscription/change/result/', views.content_edit_result, name='content_edit_result'),
+    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_content_edit, name='content_edit'),  # noqa: E501
+    path('cs/subscription/change/result/<int:subscription_id>', views.content_edit_result, name='content_edit_result'),
     url('^cs/contentchangelist/', views.contentchangelist),
     url('^cs/signup/initialselect/', views.custom_sub_initial_select, name='custom_sub_initial_select'),
     url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),

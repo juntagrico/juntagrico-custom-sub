@@ -1,9 +1,9 @@
 import logging
 
-from django.contrib.auth.decorators import login_required, permission_required
-from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
 from juntagrico import mailer as ja_mailer
 from juntagrico import models as jm
 from juntagrico.config import Config
@@ -18,14 +18,14 @@ from juntagrico.util.management_list import get_changedate
 from juntagrico.util.views_admin import subscription_management_list
 from juntagrico.views import get_menu_dict
 from juntagrico.views_create_subscription import CSSummaryView, cs_finish
+
 from juntagrico_custom_sub.models import (
     Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
     SubscriptionSizeMandatoryProducts
 )
-from juntagrico_custom_sub.util.sub_content import calculate_current_size, calculate_future_size, new_content_valid
+from juntagrico_custom_sub.util.sub_content import calculate_future_size, new_content_valid
 
 logger = logging.getLogger(__name__)
-
 
 ########################################################################################################################
 # Monkey patching CSSessionObject
@@ -91,7 +91,7 @@ class CustomCSSummaryView(CSSummaryView):
 
         # associate custom products with subscription
         if subscription is not None:
-            add_products_to_subscription(subscription.id, cs_session.custom_prod)
+            add_products_to_subscription(subscription.id, cs_session.custom_prod, SubscriptionContentItem)
         # finish registration
         return cs_finish(request)
 
@@ -105,7 +105,7 @@ def custom_cs_select_subscription(request, cs_session):
         if (not quantity_error(selected)):
             return redirect(cs_session.next_page())
     render_dict = {
-        'quantity_error': False if not (request.method == 'POST') else quantity_error(selected),
+        'error_modal': "" if not (request.method == 'POST') else quantity_error(selected),
         'selected_subscriptions': cs_session.subscriptions,
         'hours_used': Config.assignment_unit() == 'HOURS',
         'products': SubscriptionProduct.objects.all(),
@@ -114,7 +114,8 @@ def custom_cs_select_subscription(request, cs_session):
 
 
 @primary_member_of_subscription
-def size_change(request, subscription_id):
+@create_subscription_session
+def size_change(request, cs_session, subscription_id):
     """
     change the size of a subscription
     overwrites original method in juntagrico
@@ -130,14 +131,14 @@ def size_change(request, subscription_id):
         if subscription.all_shares < sum([sub_type.shares * amount for sub_type, amount in selected.items()]):
             share_error = True
         elif (not quantity_error(selected)):
-            replace_subscription_types(subscription, selected)
-            saved = True
+            cs_session.subscriptions = selected
+            return redirect('content_edit', subscription_id=subscription_id)
     products = jm.SubscriptionProduct.objects.all()
     renderdict = get_menu_dict(request)
     renderdict.update({
         'saved': saved,
         'subscription': subscription,
-        'quantity_error': quantity_error(selected) if (request.method == 'POST') else False,
+        'error_modal': quantity_error(selected) if (request.method == 'POST') else "",
         'shareerror': share_error,
         'hours_used': Config.assignment_unit() == 'HOURS',
         'next_cancel_date': temporal.next_cancelation_date(),
@@ -154,114 +155,103 @@ def quantity_error(selected):
     """
     total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
     if total_liters < 4:
-        return True
+        return "Es müssen mindestens 4 Liter in einem Abo sein."
     selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
     selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
     required8 = total_liters // 8
     required4 = (total_liters % 8) // 4
-    return not(selected8 == required8 and selected4 == required4)
+    if not(selected8 == required8 and selected4 == required4):
+        return "Du musst immer die grösstmögliche Abogrösse nehmen. \
+            Es ist zum Beispiel nicht möglich, 8 Liter auf zwei Vierliter-Abos aufzuteilen."
+    return ""
 
 
 @primary_member_of_subscription
-def subscription_content_edit(request, subscription_id=None):
+@create_subscription_session
+def subscription_content_edit(request, cs_session, subscription_id):
     returnValues = dict()
-    # subscription_id cannot be none --> route not defined
-    # member = request.user.member
-    # if subscription_id is None:
-    #     subscription = member.subscription
-    # else:
     subscription = get_object_or_404(Subscription, id=subscription_id)
-    # subscription content should always exists in this view --> no try, exist?
-    try:
-        subContent = SubscriptionContent.objects.get(subscription=subscription)
-    except SubscriptionContent.DoesNotExist:
-        subContent = SubscriptionContent.objects.create(subscription=subscription)
-        subContent.save()
-        for type in subscription.future_types.all():
-            for mandatoryProd in SubscriptionSizeMandatoryProducts.objects.filter(subscription_size=type.size):
-                subItem = SubscriptionContentFutureItem.objects.create(
-                    subscription_content=subContent,
-                    product=mandatoryProd.product,
-                    amount=mandatoryProd.amount
-                    )
-                subItem.save()
-    products = Product.objects.all().order_by('user_editable')
+    subContent = SubscriptionContent.objects.get(subscription=subscription)
+
+    if cs_session.subscriptions:  # subscription size has been changed during previous step
+        fut_subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
+        future_subscription_size = cs_session.subscription_size()
+    else:
+        fut_subs_types = count_subs_sizes(subscription.future_types.all())
+        future_subscription_size = int(calculate_future_size(subscription))
+
+    # products to be considered are only the ones that are editable or mandatory for the chosen sizes
+    mand_products = SubscriptionSizeMandatoryProducts.objects.filter(
+        subscription_size__in=[fst.size for fst in fut_subs_types.keys()]
+        ).values_list('product_id', flat=True)
+    products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by('user_editable')
     if "saveContent" in request.POST:
-        valid, error = new_content_valid(subscription, request, products)
-        if valid:
-            for product in products:
-                subItem, p = SubscriptionContentFutureItem.objects.get_or_create(
-                    product=product,
-                    subscription_content=subContent,
-                    defaults={'amount': 0, 'product': product, 'subscription_content': subContent}
-                    )
-                subItem.amount = request.POST.get("amount"+str(product.id), 0)
-                subItem.save()
-            q = '?saved'
-        else:
-            q = f'?error={error}'
-        return redirect(f"{reverse('content_edit_result')}{q}&subs_id={subscription_id}")
-    subs_sizes = count_subs_sizes(subscription.future_types.all())
+        custom_prods = parse_selected_custom_products(request.POST, products)
+        error = new_content_valid(fut_subs_types, custom_prods, products)
+        if not error:
+            if cs_session.subscriptions:  # the user may get to this point without changing the subscription
+                replace_subscription_types(subscription, cs_session.subscriptions)
+            # if there were previous future items in the db, delete them
+            SubscriptionContentFutureItem.objects.filter(subscription_content=subContent).delete()
+            add_products_to_subscription(subscription_id, custom_prods, SubscriptionContentFutureItem)
+            cs_session.clear()
+            return redirect('content_edit_result', subscription_id=subscription_id)
+
     for prod in products:
         sub_item = SubscriptionContentFutureItem.objects.filter(
-            subscription_content=subContent.id, product=prod
+            subscription_content=subContent, product=prod
             ).first()
         chosen_amount = 0 if not sub_item else sub_item.amount
-        min_amount = determine_min_amount(prod, subs_sizes)
+        min_amount = determine_min_amount(prod, fut_subs_types)
         prod.min_amount = min(min_amount, chosen_amount)
         prod.amount_in_subscription = max(chosen_amount, min_amount)
 
     returnValues['subscription'] = subscription
+    returnValues['error_modal'] = "" if not request.method == 'POST' else error
     returnValues['products'] = products
-    returnValues['subscription_size'] = int(calculate_current_size(subscription))
-    returnValues['future_subscription_size'] = int(calculate_future_size(subscription))
+    returnValues['future_subscription_size'] = future_subscription_size
     return render(request, 'cs/subscription_content_edit.html', returnValues)
 
 
-@login_required
-def content_edit_result(request, subscription_id=None):
-    rv = {}
-    if 'saved' in request.GET:
-        rv['saved'] = True
-    elif 'error' in request.GET:
-        rv['error'] = request.GET.get('error')
-    rv['subs_id'] = request.GET.get('subs_id')
-    return render(request, 'cs/content_edit_result.html', rv)
+@primary_member_of_subscription
+def content_edit_result(request, subscription_id):
+    return render(request, 'cs/content_edit_result.html')
 
 
 @create_subscription_session
 def custom_sub_initial_select(request, cs_session):
+    products = Product.objects.all().order_by('user_editable')
     if request.method == 'POST':
         # create dict with subscription type -> selected amount
-        custom_prod = selected_custom_products(request.POST)
-        cs_session.custom_prod = custom_prod
-        return redirect(cs_session.next_page())
-    products = Product.objects.all().order_by('user_editable')
-    subs_sizes = {t.size: a for t, a in cs_session.subscriptions.items() if a > 0}
+        custom_prods = parse_selected_custom_products(request.POST, products)
+        fut_subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
+        error = new_content_valid(fut_subs_types, custom_prods, products)
+        if not error:
+            cs_session.custom_prod = custom_prods
+            return redirect(cs_session.next_page())
+    subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
     for p in products:
-        p.min_amount = determine_min_amount(p, subs_sizes)
+        p.min_amount = determine_min_amount(p, subs_types)
         p.amount_in_subscription = p.min_amount
 
     returnValues = {}
     returnValues['products'] = products
     returnValues['subscription_size'] = int(cs_session.subscription_size())
+    returnValues['error_modal'] = "" if not request.method == 'POST' else error
     returnValues['future_subscription_size'] = int(cs_session.subscription_size())
     return render(request, 'cs/subscription_content_edit.html', returnValues)
 
 
-def add_products_to_subscription(subscription_id, custom_products):
+def add_products_to_subscription(subscription_id, custom_products, model):
     """
     adds custom products to the subscription with the given id.
     custom_prodducts is a dictionary with the product object as keys and their
     amount as value.
+    model is either SubscriptionContentItem or SubscriptionContentFutureItem
     """
-    content = SubscriptionContent(subscription_id=subscription_id)
-    content.save()
-    selected_items = {
-        p: a for p, a in custom_products.items() if a != 0
-        }
-    for prod, amount in selected_items.items():
-        item = SubscriptionContentItem(
+    content, created = SubscriptionContent.objects.get_or_create(subscription_id=subscription_id)
+    for prod, amount in custom_products.items():
+        item = model(
             amount=amount,
             product_id=prod.id,
             subscription_content_id=content.id
@@ -269,15 +259,15 @@ def add_products_to_subscription(subscription_id, custom_products):
         item.save()
 
 
-def determine_min_amount(product, subs_sizes):
+def determine_min_amount(product, subs_types):
     '''
     Given a product and a dictionary of subscription sizes, return the minimum (mandatory) amount.
     Allows for situations where a product can be mandatory for more than one size.
     Example of subs_sizes: {size_1: amount_1, size_2: amount_2, etc...}
     '''
     min_amount = 0
-    for size, count in subs_sizes.items():
-        mand_prod = SubscriptionSizeMandatoryProducts.objects.filter(product=product, subscription_size=size).first()
+    for st, count in subs_types.items():
+        mand_prod = SubscriptionSizeMandatoryProducts.objects.filter(product=product, subscription_size=st.size).first()
         if mand_prod:
             min_amount += mand_prod.amount * count
     return min_amount
@@ -286,18 +276,18 @@ def determine_min_amount(product, subs_sizes):
 def count_subs_sizes(subs_types):
     rv = {}
     for st in subs_types:
-        if st.size.id not in rv:
-            rv[st.size.id] = 1
+        if st not in rv:
+            rv[st] = 1
         else:
-            rv[st.size.id] += 1
+            rv[st] += 1
     return rv
 
 
-def selected_custom_products(post_data):
+def parse_selected_custom_products(post_data, products):
     return {
         prod: int(
             post_data.get(f'amount{prod.id}', 0)
-        ) for prod in Product.objects.all()
+        ) for prod in products if int(post_data.get(f'amount{prod.id}')) > 0
     }
 
 
