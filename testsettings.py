@@ -22,8 +22,11 @@ INSTALLED_APPS = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME':  'yourdatabasename.db',
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME', 'yourdatabasename.db'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'USER': os.environ.get('DB_USER')
     }
 }
 
