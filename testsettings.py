@@ -1,10 +1,13 @@
 # test_settings.py
+import ast
 import os
+
 import dj_database_url
+from django.core.management.utils import get_random_secret_key
 
-DEBUG = True
+DEBUG = ast.literal_eval(os.environ.get('DJANGO_DEBUG', 'True'))
 
-SECRET_KEY = 'fake-key'
+SECRET_KEY = get_random_secret_key()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,6 +40,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 MIDDLEWARE = (
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -44,13 +48,13 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
+SECURE_SSL_REDIRECT = not(DEBUG)
 
 EMAIL_HOST = os.environ.get('JUNTAGRICO_EMAIL_HOST')
 EMAIL_HOST_USER = os.environ.get('JUNTAGRICO_EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('JUNTAGRICO_EMAIL_PASSWORD')
 EMAIL_PORT = os.environ.get('JUNTAGRICO_EMAIL_PORT', 2525)
 EMAIL_USE_TLS = os.environ.get('JUNTAGRICO_EMAIL_TLS', False)
-
 
 WHITELIST_EMAILS = []
 
