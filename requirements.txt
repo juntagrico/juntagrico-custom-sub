@@ -1,0 +1,2 @@
+-r ./requirements-local.txt
+gunicorn==19.9.*
