@@ -69,6 +69,13 @@ STATIC_URL = '/static/'
 
 LANGUAGE_CODE = 'de-CH'
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'basimilch-neu.herokuapp.com'
+]
+
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
