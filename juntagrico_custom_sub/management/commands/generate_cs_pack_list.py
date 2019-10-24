@@ -3,6 +3,8 @@ from juntagrico.util.pdf import render_to_pdf_storage
 from juntagrico_custom_sub.models import *
 from juntagrico.models import *
 from juntagrico.dao.depotdao import DepotDao
+from django.db.models import Sum
+from collections import defaultdict
 
 
 class Command(BaseCommand):
@@ -20,7 +22,7 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
-        depots = DepotDao.all_depots_order_by_code()
+        depots = DepotDao.all_depots().order_by('weekday')
         products = Product.objects.all().order_by('id')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
@@ -28,12 +30,24 @@ class Command(BaseCommand):
         for product in products:
             if latest_delivery.items.filter(product=product):
                 product.name = latest_delivery.items.get(product=product).name
+        depot_result = {}
+        grouped_depots = {}
         for depot in depots:
-            depot.fill_overview_cache()
-            depot.fill_active_subscription_cache()
+            grouped_depots.setdefault(depot.weekday_name, []).append(depot)
+        for weekday,depot_list in grouped_depots.items():
+            depot_dict = {}
+            for depot in depot_list:
+                depot.fill_overview_cache()
+                depot.fill_active_subscription_cache()
+                amount_of_product = []
+                for product in products:
+                    productAmount = depot.subscription_cache.filter(content__products__product__id=product.id).aggregate(Sum('content__products__amount'))['content__products__amount__sum'] or 0
+                    amount_of_product.append(productAmount)
+                depot_dict[depot]=amount_of_product
+            depot_result.setdefault(depot.weekday_name, []).append(depot_dict)
         renderdict = {
-            'depots': depots,
+            'depots': depot_result,
             'products': products
         }
-        render_to_pdf_storage('cs/exports/cs_depolist.html',
-                              renderdict, 'cs_depolist.pdf')
+        render_to_pdf_storage('cs/exports/cs_packlist.html',
+                              renderdict, 'cs_packlist.pdf')
