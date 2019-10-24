@@ -1,5 +1,6 @@
 # test_settings.py
 import os
+import dj_database_url
 
 DEBUG = True
 
@@ -20,15 +21,12 @@ INSTALLED_APPS = [
     'crispy_forms'
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME', 'yourdatabasename.db'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'USER': os.environ.get('DB_USER')
-    }
-}
+DATABASES = {}
+DATABASES['default'] = dj_database_url.config(
+    default='sqlite:///yourdatabasename.db',
+    ssl_require=not(DEBUG),
+    conn_max_age=600
+    )
 
 ROOT_URLCONF = 'testurls'
 

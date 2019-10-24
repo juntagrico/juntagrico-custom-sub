@@ -1,1 +1,2 @@
 git+http://github.com/juntagrico/juntagrico.git
+dj-database-url-0.5.*
