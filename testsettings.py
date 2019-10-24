@@ -1,9 +1,13 @@
 # test_settings.py
+import ast
 import os
 
-DEBUG = True
+import dj_database_url
+from django.core.management.utils import get_random_secret_key
 
-SECRET_KEY = 'fake-key'
+DEBUG = ast.literal_eval(os.environ.get('DJANGO_DEBUG', 'True'))
+
+SECRET_KEY = get_random_secret_key()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,12 +24,12 @@ INSTALLED_APPS = [
     'crispy_forms'
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME':  'yourdatabasename.db',
-    }
-}
+DATABASES = {}
+DATABASES['default'] = dj_database_url.config(
+    default='sqlite:///yourdatabasename.db',
+    ssl_require=not(DEBUG),
+    conn_max_age=600
+    )
 
 ROOT_URLCONF = 'testurls'
 
@@ -36,19 +40,21 @@ AUTHENTICATION_BACKENDS = (
 
 
 MIDDLEWARE = (
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
+SECURE_SSL_REDIRECT = not(DEBUG)
 
 EMAIL_HOST = os.environ.get('JUNTAGRICO_EMAIL_HOST')
 EMAIL_HOST_USER = os.environ.get('JUNTAGRICO_EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('JUNTAGRICO_EMAIL_PASSWORD')
 EMAIL_PORT = os.environ.get('JUNTAGRICO_EMAIL_PORT', 2525)
 EMAIL_USE_TLS = os.environ.get('JUNTAGRICO_EMAIL_TLS', False)
-
 
 WHITELIST_EMAILS = []
 
@@ -68,6 +74,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 LANGUAGE_CODE = 'de-CH'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'basimilch-neu.herokuapp.com'
+]
 
 SITE_ID = 1
 
