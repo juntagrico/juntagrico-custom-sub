@@ -1,15 +1,14 @@
-{% extends "base.html" %}
+{% extends "no_menu_base.html" %}
 {% load l10n %}
 {% load config %}
-{% load cs_config %}
 {% block page_title %}
 {% load staticfiles %}
 <link rel="stylesheet" type="text/css" href="{% static 'juntagrico_custom_sub/style.css' %}">
-<h3>{% vocabulary "subscription" %} Zusammenstellung</h3>
+<h3>{% vocabulary "subscription" %} Zusammenstellung2</h3>
 {% endblock %}
 
-{% block content %}
-    <div class="col-md-12">
+{% block allcontent %}
+    <div class="offset-md-2 col-md-8">
         {% include "cs/snippets/subscription_content_edit_comp.html" %}
     </div>
 {% endblock %}
