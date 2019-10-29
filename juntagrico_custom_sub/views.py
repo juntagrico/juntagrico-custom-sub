@@ -239,7 +239,7 @@ def custom_sub_initial_select(request, cs_session):
     returnValues['subscription_size'] = int(cs_session.subscription_size())
     returnValues['error_modal'] = "" if not request.method == 'POST' else error
     returnValues['future_subscription_size'] = int(cs_session.subscription_size())
-    return render(request, 'cs/subscription_content_edit.html', returnValues)
+    return render(request, 'cs/custom_select_content.html', returnValues)
 
 
 def add_products_to_subscription(subscription_id, custom_products, model):
