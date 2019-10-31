@@ -50,4 +50,4 @@ class Command(BaseCommand):
             'products': products
         }
         render_to_pdf_storage('cs/exports/cs_packlist.html',
-                              renderdict, 'cs_packlist.pdf')
+                              renderdict, 'depot_overview.pdf')
