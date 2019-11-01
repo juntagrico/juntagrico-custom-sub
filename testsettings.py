@@ -3,11 +3,10 @@ import ast
 import os
 
 import dj_database_url
-from django.core.management.utils import get_random_secret_key
 
 DEBUG = ast.literal_eval(os.environ.get('DJANGO_DEBUG', 'True'))
 
-SECRET_KEY = get_random_secret_key()
+SECRET_KEY = os.environ.get('SECRET_KEY', 'fake-key')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -38,6 +37,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
+SERVER_URL = 'basimilch-neu.herokuapp.com'
 
 MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',

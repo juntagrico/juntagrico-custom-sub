@@ -36,4 +36,4 @@ class Command(BaseCommand):
             'products': products
         }
         render_to_pdf_storage('cs/exports/cs_depolist.html',
-                              renderdict, 'cs_depolist.pdf')
+                              renderdict, 'depotlist.pdf')

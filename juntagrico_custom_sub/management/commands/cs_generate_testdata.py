@@ -269,13 +269,13 @@ class Command(BaseCommand):
             "name": "Fruchtjoghurt",
             "units": 0.5,
             "unit_multiplier": 500,
-            "unit_name": "Kilo",
+            "unit_name": "Gramm",
         }
         prod5_fields = {
             "name": "Naturejoghurt",
             "units": 0.5,
             "unit_multiplier": 500,
-            "unit_name": "Kilo",
+            "unit_name": "Gramm",
         }
         prod6_fields = {
             "name": "Wochenkäse klein",
