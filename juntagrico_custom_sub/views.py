@@ -33,14 +33,19 @@ logger = logging.getLogger(__name__)
 # Adds the custom product selectin to the signup process
 ########################################################################################################################
 old_init = sessions.CSSessionObject.__init__
-
+old_to_dict = sessions.CSSessionObject.to_dict
 
 def new_init(self):
     old_init(self)
     self.custom_prod = {}
 
+def new_to_dict(self):
+    result = old_to_dict(self)
+    result['custom_prod'] = self.custom_prod
+    return result
 
 sessions.CSSessionObject.__init__ = new_init
+sessions.CSSessionObject.to_dict = new_to_dict
 
 
 def new_next_page(self):
@@ -69,6 +74,8 @@ class CustomCSSummaryView(CSSummaryView):
     Custom summary view for custom products.
     Overwrites post method to make sure custom products are added to the subscription
     """
+    template_name = 'cs/custom_summary.html'
+
     @staticmethod
     def post(request, cs_session):
         # create subscription
@@ -232,7 +239,10 @@ def custom_sub_initial_select(request, cs_session):
     subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
     for p in products:
         p.min_amount = determine_min_amount(p, subs_types)
-        p.amount_in_subscription = p.min_amount
+        if p in cs_session.custom_prod:
+            p.amount_in_subscription = cs_session.custom_prod[p]
+        else:
+            p.amount_in_subscription = p.min_amount
 
     returnValues = {}
     returnValues['products'] = products
