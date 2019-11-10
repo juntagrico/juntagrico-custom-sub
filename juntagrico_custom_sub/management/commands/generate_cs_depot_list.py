@@ -33,7 +33,8 @@ class Command(BaseCommand):
             depot.fill_active_subscription_cache()
         renderdict = {
             'depots': depots,
-            'products': products
+            'products': products,
+            'comment': latest_delivery.delivery_comment
         }
         render_to_pdf_storage('cs/exports/cs_depolist.html',
                               renderdict, 'depotlist.pdf')
