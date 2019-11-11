@@ -82,7 +82,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '[::1]',
-    'basimilch-neu.herokuapp.com'
+    'basimilch-test.herokuapp.com'
 ]
 
 SITE_ID = 1
