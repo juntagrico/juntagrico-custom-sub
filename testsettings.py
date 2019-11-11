@@ -37,7 +37,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
-SERVER_URL = 'basimilch-neu.herokuapp.com'
+SERVER_URL = 'basimilch-test.herokuapp.com'
 
 MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',
