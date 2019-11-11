@@ -8,7 +8,7 @@ class JuntagricoCustomSub(AppConfig):
     verbose_name = "Juntagrico custom sub"
 
 addons.config.register_model_inline(SubscriptionSize, MandatoryProductInline)
-addons.config.register_sub_overview('cs/subscription_content_overview.html')
-addons.config.register_sub_change('cs/subscription_content_change.html')
-addons.config.register_admin_menu('cs/menu_content_change.html')
+addons.config.register_sub_overview('cs/hooks/subscription_content_overview.html')
+addons.config.register_sub_change('cs/hooks/subscription_content_change.html')
+addons.config.register_admin_menu('cs/hooks/menu_content_change.html')
 

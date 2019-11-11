@@ -74,7 +74,7 @@ class CustomCSSummaryView(CSSummaryView):
     Custom summary view for custom products.
     Overwrites post method to make sure custom products are added to the subscription
     """
-    template_name = 'cs/custom_summary.html'
+    template_name = 'cs/initial_summary.html'
 
     @staticmethod
     def post(request, cs_session):
@@ -104,7 +104,7 @@ class CustomCSSummaryView(CSSummaryView):
 
 
 @create_subscription_session
-def custom_cs_select_subscription(request, cs_session):
+def initial_select_size(request, cs_session):
     if request.method == 'POST':
         # create dict with subscription type -> selected amount
         selected = selected_subscription_types(request.POST)
@@ -117,7 +117,7 @@ def custom_cs_select_subscription(request, cs_session):
         'hours_used': Config.assignment_unit() == 'HOURS',
         'products': SubscriptionProduct.objects.all(),
     }
-    return render(request, 'cs/custom_select_subscription.html', render_dict)
+    return render(request, 'cs/initial_select_size.html', render_dict)
 
 
 @primary_member_of_subscription
@@ -152,7 +152,7 @@ def size_change(request, cs_session, subscription_id):
         'selected_subscription': subscription.future_types.all()[0].id,
         'products': products,
     })
-    return render(request, 'cs/custom_size_change.html', renderdict)
+    return render(request, 'cs/size_change.html', renderdict)
 
 
 def quantity_error(selected):
@@ -175,7 +175,7 @@ def quantity_error(selected):
 
 @primary_member_of_subscription
 @create_subscription_session
-def subscription_content_edit(request, cs_session, subscription_id):
+def subscription_select_content(request, cs_session, subscription_id):
     returnValues = dict()
     subscription = get_object_or_404(Subscription, id=subscription_id)
     subContent = SubscriptionContent.objects.get(subscription=subscription)
@@ -217,7 +217,7 @@ def subscription_content_edit(request, cs_session, subscription_id):
     returnValues['error_modal'] = "" if not request.method == 'POST' else error
     returnValues['products'] = products
     returnValues['future_subscription_size'] = future_subscription_size
-    return render(request, 'cs/subscription_content_edit.html', returnValues)
+    return render(request, 'cs/subscription_select_content.html', returnValues)
 
 
 @primary_member_of_subscription
@@ -226,7 +226,7 @@ def content_edit_result(request, subscription_id):
 
 
 @create_subscription_session
-def custom_sub_initial_select(request, cs_session):
+def initial_select_content(request, cs_session):
     products = Product.objects.all().order_by('user_editable')
     if request.method == 'POST':
         # create dict with subscription type -> selected amount
@@ -249,7 +249,7 @@ def custom_sub_initial_select(request, cs_session):
     returnValues['subscription_size'] = int(cs_session.subscription_size())
     returnValues['error_modal'] = "" if not request.method == 'POST' else error
     returnValues['future_subscription_size'] = int(cs_session.subscription_size())
-    return render(request, 'cs/custom_select_content.html', returnValues)
+    return render(request, 'cs/initial_select_content.html', returnValues)
 
 
 def add_products_to_subscription(subscription_id, custom_products, model):
@@ -302,7 +302,7 @@ def parse_selected_custom_products(post_data, products):
 
 
 @permission_required('juntagrico.is_operations_group')
-def contentchangelist(request, subscription_id=None):
+def list_content_changes(request, subscription_id=None):
     render_dict = get_menu_dict(request)
     render_dict.update(get_changedate(request))
     changedlist = []
@@ -310,7 +310,7 @@ def contentchangelist(request, subscription_id=None):
     for subscription in subscriptions_list:
         if subscription.content.content_changed:
             changedlist.append(subscription)
-    return subscription_management_list(changedlist, render_dict, 'cs/contentchangelist.html', request)
+    return subscription_management_list(changedlist, render_dict, 'cs/list_content_changes.html', request)
 
 
 @permission_required('juntagrico.is_operations_group')

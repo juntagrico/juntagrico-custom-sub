@@ -19,12 +19,12 @@ from django.urls import path
 from juntagrico_custom_sub import views
 
 urlpatterns = [
-    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_content_edit, name='content_edit'),  # noqa: E501
+    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_select_content, name='content_edit'),  # noqa: E501
     path('cs/subscription/change/result/<int:subscription_id>', views.content_edit_result, name='content_edit_result'),
-    url('^cs/contentchangelist/', views.contentchangelist),
-    url('^cs/signup/initialselect/', views.custom_sub_initial_select, name='custom_sub_initial_select'),
+    url('^cs/contentchangelist/', views.list_content_changes),
+    url('^cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
     url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),
     path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
     path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
-    path('my/create/subscription/', views.custom_cs_select_subscription, name='cs-subscription'),
+    path('my/create/subscription/', views.initial_select_size, name='cs-subscription'),
 ]
