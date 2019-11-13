@@ -5,7 +5,7 @@ from django.utils.translation import gettext as _
 
 class CustomDelivery(models.Model):
     delivery_date = models.DateField(_('Lieferdatum'))
-    delivery_comment = models.TextField(_('Kommentar'), default="")
+    delivery_comment = models.TextField(_('Mitteilung'), default="", blank=True)
     def __str__(self):
         return u"%s" % (self.delivery_date)
     class Meta:
@@ -19,8 +19,6 @@ class CustomDeliveryProduct(models.Model):
     product = models.ForeignKey(Product, verbose_name=_(
         'Produkt'), on_delete=models.CASCADE)
     name = models.CharField(_('Name'), max_length=100, default="")
-    comment = models.CharField(_('Kommentar'), max_length=1000,
-                               default="", blank=True)
 
     class Meta:
         verbose_name = _('Lieferobjekt')
