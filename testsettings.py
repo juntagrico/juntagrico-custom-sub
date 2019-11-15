@@ -1,60 +1,46 @@
 # test_settings.py
-import ast
 import os
 
-import dj_database_url
+DEBUG = True
 
-DEBUG = ast.literal_eval(os.environ.get('DJANGO_DEBUG', 'True'))
-
-SECRET_KEY = os.environ.get('SECRET_KEY', 'fake-key')
+SECRET_KEY = "fake-key"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
-    'juntagrico',
-    'juntagrico_custom_sub',
-    'crispy_forms'
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.sites",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.admin",
+    "juntagrico",
+    "juntagrico_custom_sub",
+    "crispy_forms",
 ]
 
-DATABASES = {}
-DATABASES['default'] = dj_database_url.config(
-    default='sqlite:///yourdatabasename.db',
-    ssl_require=not(DEBUG),
-    conn_max_age=600
-    )
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "yourdatabasename.db"}}
 
-ROOT_URLCONF = 'testurls'
+ROOT_URLCONF = "testurls"
 
-AUTHENTICATION_BACKENDS = (
-    'juntagrico.util.auth.AuthenticateWithEmail',
-    'django.contrib.auth.backends.ModelBackend'
-)
+AUTHENTICATION_BACKENDS = ("juntagrico.util.auth.AuthenticateWithEmail", "django.contrib.auth.backends.ModelBackend")
 
-SERVER_URL = 'basimilch-test.herokuapp.com'
 
 MIDDLEWARE = (
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
 )
-SECURE_SSL_REDIRECT = not(DEBUG)
 
-EMAIL_HOST = os.environ.get('JUNTAGRICO_EMAIL_HOST')
-EMAIL_HOST_USER = os.environ.get('JUNTAGRICO_EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('JUNTAGRICO_EMAIL_PASSWORD')
-EMAIL_PORT = os.environ.get('JUNTAGRICO_EMAIL_PORT', 2525)
-EMAIL_USE_TLS = os.environ.get('JUNTAGRICO_EMAIL_TLS', False)
+EMAIL_HOST = os.environ.get("JUNTAGRICO_EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("JUNTAGRICO_EMAIL_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("JUNTAGRICO_EMAIL_PASSWORD")
+EMAIL_PORT = os.environ.get("JUNTAGRICO_EMAIL_PORT", 2525)
+EMAIL_USE_TLS = os.environ.get("JUNTAGRICO_EMAIL_TLS", False)
+
 
 WHITELIST_EMAILS = []
 
@@ -62,28 +48,18 @@ WHITELIST_EMAILS = []
 def whitelist_email_from_env(var_env_name):
     email = os.environ.get(var_env_name)
     if email:
-        WHITELIST_EMAILS.append(email.replace('@gmail.com', '(\+\S+)?@gmail.com'))
+        WHITELIST_EMAILS.append(email.replace("@gmail.com", "(\+\S+)?@gmail.com"))
 
 
 if DEBUG is True:
     for key in os.environ.keys():
         if key.startswith("JUNTAGRICO_EMAIL_WHITELISTED"):
             whitelist_email_from_env(key)
-        
-if os.environ.get('WHITELIST_EMAILS'):
-    WHITELIST_EMAILS += os.environ.get('WHITELIST_EMAILS').split(';')
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
 
-LANGUAGE_CODE = 'de-CH'
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '[::1]',
-    'basimilch-test.herokuapp.com'
-]
+LANGUAGE_CODE = "de_CH"
 
 SITE_ID = 1
 
@@ -95,38 +71,39 @@ USE_I18N = True
 # calendars according to the current locale.
 USE_L10N = True
 
-DATE_INPUT_FORMATS = ['%d.%m.%Y']
+DATE_INPUT_FORMATS = ["%d.%m.%Y"]
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
-TIME_ZONE = 'Europe/Zurich'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'context_processors': [
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "OPTIONS": {
+            "context_processors": [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
-                'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
             ],
-            'loaders': [
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+                "juntagrico.personalisation.loaders.personal_directories.Loader",
             ],
-            'debug': True
+            "debug": True,
         },
-    },
+    }
 ]
 
 LOGIN_REDIRECT_URL = "/my/home"
 
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
-GOOGLE_API_KEY = 'AIzaSyCcii4Z71qyky54kEQtRhFbB_z-2zbSU28'
+
+GOOGLE_API_KEY = "AIzaSyCcii4Z71qyky54kEQtRhFbB_z-2zbSU28"
