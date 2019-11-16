@@ -1,5 +1,6 @@
 {% load config %}
 {% load i18n %}
+{% load common %}
 {% vocabulary "depot" as v_depot %}
 <html>
 
@@ -43,6 +44,9 @@
             text-align: center;
             border: 1px solid black;
             padding-top: 0.4em;
+        }   
+        .depot-table td.total{
+            border: none;
         }
 
         .depot-table td .even {
@@ -54,22 +58,26 @@
 <body>
     {% for weekday,depot_list in depots.items %}
     <h2>{{ weekday }}</h2>
-    <table class="depot-table">
+    <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "depot" %}</th>
         {% for product in products %}
         <th>{{product.name}}</th>
         {% endfor %}
-        {% for depot_item in depot_list%}
-            {% for depot,depot_products in depot_item.items %}
+        {% for depot in depot_list%}
             <tr>
                 <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name}}</td>
-                {% for amount in depot_products %}
+                {% for amount in depot.product_totals %}
                 <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">{% if amount != 0 %} <span>
                         {{amount}} </span> {% endif %}</td>
                 {% endfor %}
             </tr>
-            {% endfor %}
         {% endfor %}
+        <tr>
+            <td class="total">Total</td>
+            {% for amount in totals|get_item:weekday %}
+            <td class="total">{{amount}}</td>
+            {% endfor %}
+        </tr>
     </table>
     <div class="page-break"></div>
     {% endfor %}

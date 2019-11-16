@@ -20,7 +20,7 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
-        depots = DepotDao.all_depots_order_by_code()
+        depots = CsDepot.objects.all().order_by('code')
         products = Product.objects.all().order_by('id')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
@@ -30,7 +30,6 @@ class Command(BaseCommand):
                 product.name = latest_delivery.items.get(product=product).name
         for depot in depots:
             depot.fill_overview_cache()
-            depot.fill_active_subscription_cache()
         renderdict = {
             'depots': depots,
             'products': products,
