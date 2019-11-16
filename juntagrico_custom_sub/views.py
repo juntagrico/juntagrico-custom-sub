@@ -109,6 +109,7 @@ def initial_select_size(request, cs_session):
         # create dict with subscription type -> selected amount
         selected = selected_subscription_types(request.POST)
         cs_session.subscriptions = selected
+        cs_session.custom_prod = {}
         if (not quantity_error(selected)):
             return redirect(cs_session.next_page())
     render_dict = {
