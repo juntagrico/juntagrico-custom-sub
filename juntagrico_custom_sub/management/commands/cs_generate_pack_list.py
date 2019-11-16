@@ -22,7 +22,7 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
-        depots = DepotDao.all_depots().order_by('weekday')
+        depots = CsDepot.objects.all().order_by('weekday')
         products = Product.objects.all().order_by('id')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
@@ -30,24 +30,20 @@ class Command(BaseCommand):
         for product in products:
             if latest_delivery.items.filter(product=product):
                 product.name = latest_delivery.items.get(product=product).name
-        depot_result = {}
         grouped_depots = {}
         for depot in depots:
             grouped_depots.setdefault(depot.weekday_name, []).append(depot)
+        totals = {}
         for weekday,depot_list in grouped_depots.items():
-            depot_dict = {}
+            total = [0]*products.count()
             for depot in depot_list:
-                depot.fill_overview_cache()
-                depot.fill_active_subscription_cache()
-                amount_of_product = []
-                for product in products:
-                    productAmount = depot.subscription_cache.filter(content__products__product__id=product.id).aggregate(Sum('content__products__amount'))['content__products__amount__sum'] or 0
-                    amount_of_product.append(productAmount)
-                depot_dict[depot]=amount_of_product
-            depot_result.setdefault(depot.weekday_name, []).append(depot_dict)
+                for x in range(0, products.count()):
+                    total[x] = total[x]+depot.product_totals[x]
+            totals[weekday] = total
         renderdict = {
-            'depots': depot_result,
-            'products': products
+            'depots': grouped_depots,
+            'products': products,
+            'totals': totals
         }
         render_to_pdf_storage('cs/exports/cs_packlist.html',
                               renderdict, 'depot_overview.pdf')

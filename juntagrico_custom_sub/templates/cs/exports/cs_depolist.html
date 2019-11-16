@@ -40,6 +40,9 @@
             border: 1px solid black;
             padding-top: 0.4em;
         }
+        .depot-table td.total{
+            border: none;
+        }
         .depot-table td .even{
             background-color: #7aaae0;
         }
@@ -66,7 +69,7 @@
         <div class="no-padding">{{ depot.contact.first_name }} {{depot.contact.last_name}}</div>
         <div class="no-padding">{{ depot.contact.email }}</div>
     </div>
-    <table class="depot-table">
+    <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
         {% for product in products %}
         <th>{{product.name}}</th>
@@ -81,6 +84,12 @@
             <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
         </tr>
         {% endfor %}
+        <tr>
+            <td class="total">Total</td>
+            {% for total in depot.product_totals %}
+            <td class="total">{{total}}</td>
+            {% endfor %}
+        </tr>
     </table>
     <h3>{% trans "Mitteilung" %}:</h3>
     <p>{{ comment }}</p>

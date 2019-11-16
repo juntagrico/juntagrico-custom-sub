@@ -13,3 +13,6 @@ from juntagrico_custom_sub.entity.subscription_content_future_item import (
 from juntagrico_custom_sub.entity.subscription_size_mandatory_products import (
     SubscriptionSizeMandatoryProducts
 )
+from juntagrico_custom_sub.entity.cs_depot import (
+    CsDepot
+)
