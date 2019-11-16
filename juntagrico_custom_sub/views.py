@@ -1,9 +1,17 @@
 import logging
+import functools
 
 from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from juntagrico_custom_sub.models import (
+    Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
+    SubscriptionSizeMandatoryProducts
+)
+from juntagrico_custom_sub.util.sub_content import calculate_future_size, new_content_valid
+
 from juntagrico import mailer as ja_mailer
 from juntagrico import models as jm
 from juntagrico.config import Config
@@ -17,58 +25,46 @@ from juntagrico.util.management import replace_subscription_types
 from juntagrico.util.management_list import get_changedate
 from juntagrico.util.views_admin import subscription_management_list
 from juntagrico.views import get_menu_dict
+from juntagrico import views_subscription
 from juntagrico.views_create_subscription import CSSummaryView, cs_finish
-
-from juntagrico_custom_sub.models import (
-    Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
-    SubscriptionSizeMandatoryProducts
-)
-from juntagrico_custom_sub.util.sub_content import calculate_future_size, new_content_valid
 
 logger = logging.getLogger(__name__)
 
-########################################################################################################################
-# Monkey patching CSSessionObject
-#
-# Adds the custom product selectin to the signup process
-########################################################################################################################
-old_init = sessions.CSSessionObject.__init__
-old_to_dict = sessions.CSSessionObject.to_dict
 
-def new_init(self):
-    old_init(self)
-    self.custom_prod = {}
+class CustomSessionObject(sessions.CSSessionObject):
+    def __init__(self):
+        super().__init__()
+        self.custom_prod = {}
 
-def new_to_dict(self):
-    result = old_to_dict(self)
-    result['custom_prod'] = self.custom_prod
-    return result
+    def next_page(self):
+        has_subs = self.subscription_size() > 0
+        if not self.subscriptions:
+            return "cs-subscription"
+        elif has_subs and not self.custom_prod:
+            return "custom_sub_initial_select"
+        elif has_subs and not self.depot:
+            return "cs-depot"
+        elif has_subs and not self.start_date:
+            return "cs-start"
+        elif has_subs and not self.co_members_done:
+            return "cs-co-members"
+        elif not self.evaluate_ordered_shares():
+            return "cs-shares"
+        return "cs-summary"
 
-sessions.CSSessionObject.__init__ = new_init
-sessions.CSSessionObject.to_dict = new_to_dict
-
-
-def new_next_page(self):
-    has_subs = self.subscription_size() > 0
-    if not self.subscriptions:
-        return 'cs-subscription'
-    elif has_subs and not self.custom_prod:
-        return 'custom_sub_initial_select'
-    elif has_subs and not self.depot:
-        return 'cs-depot'
-    elif has_subs and not self.start_date:
-        return 'cs-start'
-    elif has_subs and not self.co_members_done:
-        return 'cs-co-members'
-    elif not self.evaluate_ordered_shares():
-        return 'cs-shares'
-    return 'cs-summary'
+    def to_dict(self):
+        build_dict = {k: getattr(self, k) for k in ['main_member', 'co_members', 'depot', 'start_date', 'custom_prod']}
+        build_dict['subscriptions'] = {k: v for k, v in self.subscriptions.items() if v > 0}
+        return build_dict
 
 
-sessions.CSSessionObject.next_page = new_next_page
+class SignupView(views_subscription.SignupView):
+
+    @method_decorator(create_subscription_session(session_object_class=CustomSessionObject))
+    def dispatch(self, request, cs_session, *args, **kwargs):
+        return super().dispatch(request, cs_session, *args, **kwargs)
 
 
-########################################################################################################################
 class CustomCSSummaryView(CSSummaryView):
     """
     Custom summary view for custom products.
@@ -103,7 +99,7 @@ class CustomCSSummaryView(CSSummaryView):
         return cs_finish(request)
 
 
-@create_subscription_session
+@create_subscription_session(session_object_class=CustomSessionObject)
 def initial_select_size(request, cs_session):
     if request.method == 'POST':
         # create dict with subscription type -> selected amount
@@ -121,7 +117,7 @@ def initial_select_size(request, cs_session):
 
 
 @primary_member_of_subscription
-@create_subscription_session
+@create_subscription_session(session_object_class=CustomSessionObject)
 def size_change(request, cs_session, subscription_id):
     """
     change the size of a subscription
@@ -174,7 +170,7 @@ def quantity_error(selected):
 
 
 @primary_member_of_subscription
-@create_subscription_session
+@create_subscription_session(session_object_class=CustomSessionObject)
 def subscription_select_content(request, cs_session, subscription_id):
     returnValues = dict()
     subscription = get_object_or_404(Subscription, id=subscription_id)
@@ -225,7 +221,7 @@ def content_edit_result(request, subscription_id):
     return render(request, 'cs/content_edit_result.html')
 
 
-@create_subscription_session
+@create_subscription_session(session_object_class=CustomSessionObject)
 def initial_select_content(request, cs_session):
     products = Product.objects.all().order_by('user_editable')
     if request.method == 'POST':

@@ -27,4 +27,5 @@ urlpatterns = [
     path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
     path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
     path('my/create/subscription/', views.initial_select_size, name='cs-subscription'),
+    path('my/signup/', views.SignupView.as_view(), name='signup'),
 ]
