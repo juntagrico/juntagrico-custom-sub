@@ -110,7 +110,7 @@ def initial_select_size(request, cs_session):
         selected = selected_subscription_types(request.POST)
         cs_session.subscriptions = selected
         cs_session.custom_prod = {}
-        if (not quantity_error(selected)):
+        if (not quantity_error(selected) or request.POST.get('subscription') =='-1'):
             return redirect(cs_session.next_page())
     render_dict = {
         'error_modal': "" if not (request.method == 'POST') else quantity_error(selected),
@@ -163,7 +163,7 @@ def quantity_error(selected):
     """
     total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
     if total_liters < 4:
-        return "Es müssen mindestens 4 Liter in einem Abo sein."
+        return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
     selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
     selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
     required8 = total_liters // 8
