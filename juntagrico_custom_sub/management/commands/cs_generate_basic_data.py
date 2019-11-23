@@ -100,13 +100,13 @@ class Command(BaseCommand):
         prod4_fields = {
             "name": "Fruchtjoghurt",
             "units": 0.5,
-            "unit_multiplier": 500,
+            "unit_multiplier": 1000,
             "unit_name": "Gramm",
         }
         prod5_fields = {
             "name": "Naturejoghurt",
             "units": 0.5,
-            "unit_multiplier": 500,
+            "unit_multiplier": 1000,
             "unit_name": "Gramm",
         }
         prod6_fields = {
