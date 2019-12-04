@@ -1,9 +1,5 @@
 {% extends "createsubscription/select_subscription.html" %}
-{% block allcontent %}
-    {% include "cs/snippets/size_error_modal.html" %}
-    {{ block.super }}
-{% endblock %} -->
-{% block scripts %}
-    {% include "cs/snippets/size_error_js.html" %}
+{% block all_page_title %}
+    {% include "cs/snippets/error_message.html" with initial=True %}
     {{ block.super }}
 {% endblock %}
