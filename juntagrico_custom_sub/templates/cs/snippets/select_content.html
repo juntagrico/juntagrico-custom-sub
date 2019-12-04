@@ -1,7 +1,6 @@
 {% load config %}
 {% load cs_config %}
 {% load l10n %}
-{% include "cs/snippets/size_error_modal.html" %}
 <p>Dein {{ future_subscription_size }} {% cs_vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende
     Produkte:</p>
 <p id="remainingUnits" style="visibility: hidden;">placeholder text</p>
@@ -39,7 +38,6 @@
     <button id="formSubmit" class="btn btn-success" type="submit" name="saveContent">Aboinhalt speichern</button>
 </form>
 {% localize off %}
-{% include "cs/snippets/size_error_js.html" %}
 <script type='text/javascript'>
     window.onload = function () {
         calculateRemainingUnits();
