@@ -23,4 +23,3 @@ class CustomDeliveryProduct(models.Model):
     class Meta:
         verbose_name = _('Lieferobjekt')
         verbose_name_plural = _('Lieferobjekte')
-        unique_together = ("product", "delivery")

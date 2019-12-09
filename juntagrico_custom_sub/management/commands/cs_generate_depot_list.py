@@ -3,6 +3,7 @@ from juntagrico.util.pdf import render_to_pdf_storage
 from juntagrico_custom_sub.models import *
 from juntagrico.models import *
 from juntagrico.dao.depotdao import DepotDao
+import copy
 
 
 class Command(BaseCommand):
@@ -25,14 +26,20 @@ class Command(BaseCommand):
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
         #Rename products based on their name in the latest delivery
+        deliveryProducts = []
         for product in products:
             if latest_delivery.items.filter(product=product):
-                product.name = latest_delivery.items.get(product=product).name
+                for deliveryProduct in latest_delivery.items.filter(product=product):
+                    renamedProduct = copy.deepcopy(product)
+                    renamedProduct.name = deliveryProduct.name
+                    deliveryProducts.append(renamedProduct)
+            else:
+                deliveryProducts.append(product)
         for depot in depots:
             depot.fill_overview_cache()
         renderdict = {
             'depots': depots,
-            'products': products,
+            'products': deliveryProducts,
             'comment': latest_delivery.delivery_comment
         }
         render_to_pdf_storage('cs/exports/cs_depolist.html',

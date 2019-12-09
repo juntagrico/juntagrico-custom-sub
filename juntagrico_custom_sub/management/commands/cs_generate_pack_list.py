@@ -5,6 +5,7 @@ from juntagrico.models import *
 from juntagrico.dao.depotdao import DepotDao
 from django.db.models import Sum
 from collections import defaultdict
+import copy
 
 
 class Command(BaseCommand):
@@ -27,22 +28,28 @@ class Command(BaseCommand):
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
         #Rename products based on their name in the latest delivery
+        deliveryProducts = []
         for product in products:
             if latest_delivery.items.filter(product=product):
-                product.name = latest_delivery.items.get(product=product).name
+                for deliveryProduct in latest_delivery.items.filter(product=product):
+                    renamedProduct = copy.deepcopy(product)
+                    renamedProduct.name = deliveryProduct.name
+                    deliveryProducts.append(renamedProduct)
+            else:
+                deliveryProducts.append(product)
         grouped_depots = {}
         for depot in depots:
             grouped_depots.setdefault(depot.weekday_name, []).append(depot)
         totals = {}
         for weekday,depot_list in grouped_depots.items():
-            total = [0]*products.count()
+            total = [0]*len(deliveryProducts)
             for depot in depot_list:
-                for x in range(0, products.count()):
-                    total[x] = total[x]+depot.product_totals[x]
+                for idx,prod in enumerate(deliveryProducts):
+                    total[idx] = total[idx]+depot.product_totals[prod]
             totals[weekday] = total
         renderdict = {
             'depots': grouped_depots,
-            'products': products,
+            'products': deliveryProducts,
             'totals': totals
         }
         render_to_pdf_storage('cs/exports/cs_packlist.html',

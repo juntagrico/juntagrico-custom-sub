@@ -15,14 +15,14 @@ class SubscriptionContent(models.Model):
 
     @property
     def amounts_for_products(self):
-        result = []
+        result = {}
         products = Product.objects.all().order_by('id')
         for prod in products:
             try:
                 amount = self.products.get(product=prod).amount
-                result.append(amount)
+                result[prod] = amount
             except ObjectDoesNotExist:
-                result.append(0)
+                result[prod] = 0
                 pass
         return result
 

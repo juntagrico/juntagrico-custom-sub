@@ -9,7 +9,6 @@
     <style>
         @page {
             size: a4 landscape;
-
             @frame content_frame {
                 left: 50pt;
                 width: 742pt;
@@ -44,8 +43,9 @@
             text-align: center;
             border: 1px solid black;
             padding-top: 0.4em;
-        }   
-        .depot-table td.total{
+        }
+
+        .depot-table td.total {
             border: none;
         }
 
@@ -64,13 +64,14 @@
         <th>{{product.name}}</th>
         {% endfor %}
         {% for depot in depot_list%}
-            <tr>
-                <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name}}</td>
-                {% for amount in depot.product_totals %}
-                <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">{% if amount != 0 %} <span>
-                        {{amount}} </span> {% endif %}</td>
-                {% endfor %}
-            </tr>
+        <tr>
+            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name}}</td>
+            {% for product in products %}
+            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
+                {% if depot.product_totals|get_item:product != 0 %} <span>
+                    {{depot.product_totals|get_item:product}} </span> {% endif %}</td>
+            {% endfor %}
+        </tr>
         {% endfor %}
         <tr>
             <td class="total">Total</td>

@@ -1,3 +1,4 @@
+{% load common %}
 {% load config %}
 {% load i18n %}
 {% vocabulary "depot" as v_depot %}
@@ -8,6 +9,7 @@
     <style>
         @page {
             size: a4 landscape;
+
             @frame content_frame {
                 left: 50pt;
                 width: 742pt;
@@ -15,46 +17,58 @@
                 height: 495pt;
             }
         }
+
         body {
             font-size: 12pt;
         }
+
         .page-break {
             page-break-after: always;
         }
+
         .depot-table {
             margin-top: 1em;
         }
-        .depot-table td.name{
+
+        .depot-table td.name {
             text-align: left;
             padding-left: 0.2em;
         }
+
         .depot-table th.name {
             text-align: left;
             padding-left: 0.2em;
         }
+
         .depot-table th.name {
             text-align: center;
         }
+
         .depot-table td {
-            text-align: center; 
+            text-align: center;
             border: 1px solid black;
             padding-top: 0.4em;
         }
-        .depot-table td.total{
+
+        .depot-table td.total {
             border: none;
         }
-        .depot-table td .even{
+
+        .depot-table td .even {
             background-color: #7aaae0;
         }
+
         .contact {
             font-size: 10pt;
-            text-align: right;    
-            line-height: 10pt; 
+            text-align: right;
+            line-height: 10pt;
         }
+
         .no-padding {
             padding: 0;
             margin: 0;
         }
+
         h2 {
             margin-bottom: 0;
         }
@@ -78,16 +92,18 @@
         {% for sub in depot.subscription_cache.all %}
         <tr>
             <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.get_name}}</td>
-            {% for amount in sub.content.amounts_for_products %}
-            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">{% if amount != 0 %} <span> {{amount}} </span> {% endif %}</td>
+            {% for product in products %}
+            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
+                {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
+                    {{sub.content.amounts_for_products|get_item:product}} </span> {% endif %}</td>
             {% endfor %}
             <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
         </tr>
         {% endfor %}
         <tr>
             <td class="total">Total</td>
-            {% for total in depot.product_totals %}
-            <td class="total">{{total}}</td>
+            {% for product in products %}
+            <td class="total">{{depot.product_totals|get_item:product}}</td>
             {% endfor %}
         </tr>
     </table>
