@@ -1,4 +1,4 @@
-from juntagrico.models import Depot
+from juntagrico.entity.depot import Depot
 from juntagrico_custom_sub.models import Product
 from django.db.models import Sum
 

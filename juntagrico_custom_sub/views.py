@@ -8,11 +8,11 @@ from django.urls import reverse
 from django.utils import timezone
 
 from juntagrico import mailer as ja_mailer
-from juntagrico import models as jm
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
-from juntagrico.models import Subscription, SubscriptionProduct
+from juntagrico.entity.subs import Subscription
+from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionType
 from juntagrico.util import management as ja_mgmt
 from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.form_evaluation import selected_subscription_types
@@ -85,24 +85,24 @@ class CustomCSSummaryView(CSSummaryView):
 
     @staticmethod
     def post(request, cs_session):
-        # create subscription
+        # create member (or get existing)
+        member, creation_data = ja_mgmt.create_or_update_member(cs_session.main_member)
+
+        # create share(s) for member
+        ja_mgmt.create_share(member, cs_session.main_member.new_shares)
+
+        # create subscription for member
         subscription = None
         if sum(cs_session.subscriptions.values()) > 0:
-            subscription = ja_mgmt.create_subscription(
-                cs_session.start_date, cs_session.depot, cs_session.subscriptions
-            )
+            subscription = ja_mgmt.create_subscription(cs_session.start_date, cs_session.depot, cs_session.subscriptions, member)
 
-        # create and/or add members to subscription and create their shares
-        ja_mgmt.create_or_update_member(cs_session.main_member, subscription, cs_session.main_member.new_shares)
+        # add co-members
         for co_member in cs_session.co_members:
-            ja_mgmt.create_or_update_member(co_member, subscription, co_member.new_shares, cs_session.main_member)
+            ja_mgmt.create_or_update_co_member(co_member, subscription, co_member.new_shares)
 
-        # set primary member of subscription
-        if subscription is not None:
-            subscription.primary_member = cs_session.main_member
-            subscription.save()
-            ja_mailer.send_subscription_created_mail(subscription)
-
+        # send notifications
+        if creation_data['created']:
+            MemberNotification.welcome(member, creation_data['password'])
         # associate custom products with subscription
         if subscription is not None:
             add_products_to_subscription(subscription.id, cs_session.custom_prod, SubscriptionContentItem)
@@ -156,7 +156,7 @@ def size_change(request, cs_session, subscription_id):
         else:
             cs_session.error = err_msg
             return redirect("size-change", subscription_id=subscription_id)
-    products = jm.SubscriptionProduct.objects.all()
+    products = SubscriptionProduct.objects.all()
     renderdict = get_menu_dict(request)
     renderdict.update(
         {
@@ -187,8 +187,8 @@ def quantity_error(selected):
     total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
     if total_liters < 4:
         return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
-    selected4 = selected[jm.SubscriptionType.objects.get(size__units=4)]
-    selected8 = selected[jm.SubscriptionType.objects.get(size__units=8)]
+    selected4 = selected[SubscriptionType.objects.get(size__units=4)]
+    selected8 = selected[SubscriptionType.objects.get(size__units=8)]
     required8 = total_liters // 8
     required4 = (total_liters % 8) // 4
     if not (selected8 == required8 and selected4 == required4):
