@@ -11,6 +11,7 @@ from juntagrico import mailer as ja_mailer
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
+from juntagrico.mailer import MemberNotification
 from juntagrico.entity.subs import Subscription
 from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionType
 from juntagrico.util import management as ja_mgmt
