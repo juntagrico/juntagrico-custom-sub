@@ -16,7 +16,7 @@ def get_requirements(requirements_file):
 
 setup(
     name='juntagrico-custom-sub',
-    version='0.0.3',
+    version='0.1.0',
     packages=find_packages(),
     include_package_data=True,
     license='LPGLv3',  # example license
@@ -28,7 +28,7 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.0',  # replace "X.Y" as appropriate
+        'Framework :: Django :: 3.0',  # replace "X.Y" as appropriate
         'Intended Audience :: Developers',
         'License :: OSI Approved :: LPGLv3',  # example license
         'Operating System :: OS Independent',

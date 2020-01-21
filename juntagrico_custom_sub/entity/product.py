@@ -1,5 +1,5 @@
 from django.db import models
-from juntagrico.models import SubscriptionSize
+from juntagrico.entity.subtypes import SubscriptionSize
 from django.utils.translation import gettext as _
 
 class Product(models.Model):

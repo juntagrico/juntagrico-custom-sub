@@ -1,5 +1,5 @@
 from django.db import models
-from juntagrico.models import SubscriptionSize
+from juntagrico.entity.subtypes import SubscriptionSize
 from juntagrico_custom_sub.entity.product import Product
 
 
