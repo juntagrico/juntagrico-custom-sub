@@ -104,5 +104,9 @@ LOGIN_REDIRECT_URL = "/my/home"
 
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
 
 GOOGLE_API_KEY = "AIzaSyCcii4Z71qyky54kEQtRhFbB_z-2zbSU28"

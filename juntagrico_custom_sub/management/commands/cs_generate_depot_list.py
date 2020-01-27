@@ -1,11 +1,18 @@
+import copy
+
+from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
+from django.template.loader import get_template
+from django.utils import timezone
+from weasyprint import HTML
+
+from juntagrico.config import Config
+from juntagrico.dao.depotdao import DepotDao
+from juntagrico.models import *
 from juntagrico.util.pdf import render_to_pdf_storage
 from juntagrico_custom_sub.models import *
-from juntagrico.models import *
-from juntagrico.dao.depotdao import DepotDao
-from juntagrico.config import Config
-from django.utils import timezone
-import copy
+from django.template.loader import render_to_string
+
 
 
 class Command(BaseCommand):
@@ -44,5 +51,14 @@ class Command(BaseCommand):
             'products': deliveryProducts,
             'comment': latest_delivery.delivery_comment
         }
-        render_to_pdf_storage('cs/exports/cs_depolist.html',
-                              renderdict, 'depotlist.pdf')
+        pdf = f'{default_storage.base_location}/depotlist.pdf'
+        html = f'{default_storage.base_location}/depotlist.html'
+        if default_storage.exists(pdf):
+            default_storage.delete(pdf)
+        if default_storage.exists(html):
+            default_storage.delete(html)
+        rendered = render_to_string('cs/exports/cs_depolist.html', renderdict)
+        with open(html, 'w') as static_file:
+            static_file.write(rendered)
+
+        HTML(html).write_pdf(pdf)
