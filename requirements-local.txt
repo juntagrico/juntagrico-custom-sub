@@ -1,2 +1,2 @@
-juntagrico==1.2.1
+juntagrico==1.2.2
 dj-database-url==0.5.*
