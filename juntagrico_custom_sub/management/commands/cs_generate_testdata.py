@@ -4,7 +4,13 @@ from django.core.management.base import BaseCommand
 
 from django import utils
 from juntagrico import models as jm
+from juntagrico.entity import subtypes as st
+from juntagrico.entity.depot import Depot
+from juntagrico.entity.jobs import ActivityArea,JobType
+from juntagrico.entity.extrasubs import ExtraSubscriptionCategory,ExtraSubscriptionType
+from juntagrico.entity.billing import ExtraSubBillingPeriod
 from juntagrico_custom_sub import models as csm
+from juntagrico.util import management as ja_mgmt
 import pytz  # noqa --> not importing creates naive time objects
 
 
@@ -59,7 +65,7 @@ class Command(BaseCommand):
         jm.Share.objects.create(**share_all_fields)
         jm.Share.objects.create(**share_all_fields)
         subprod_fields = {"name": "Milch"}
-        subproduct = jm.SubscriptionProduct.objects.create(**subprod_fields)
+        subproduct = st.SubscriptionProduct.objects.create(**subprod_fields)
         subsize1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
@@ -87,9 +93,9 @@ class Command(BaseCommand):
             "product": subproduct,
             "description": "2 Liter Abo enthält Produkte die 2 Liter Milch entsprechen.",
         }
-        subsize1 = jm.SubscriptionSize.objects.create(**subsize1_fields)
-        subsize3 = jm.SubscriptionSize.objects.create(**subsize3_fields)
-        subsize4 = jm.SubscriptionSize.objects.create(**subsize4_fields)
+        subsize1 = st.SubscriptionSize.objects.create(**subsize1_fields)
+        subsize3 = st.SubscriptionSize.objects.create(**subsize3_fields)
+        subsize4 = st.SubscriptionSize.objects.create(**subsize4_fields)
         subtrype1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
@@ -120,9 +126,9 @@ class Command(BaseCommand):
             "price": 300,
             "description": "2 Liter Abo.",
         }
-        subtype1 = jm.SubscriptionType.objects.create(**subtrype1_fields)
-        subtype3 = jm.SubscriptionType.objects.create(**subtrype3_fields)
-        jm.SubscriptionType.objects.create(**subtrype4_fields)
+        subtype1 = st.SubscriptionType.objects.create(**subtrype1_fields)
+        subtype3 = st.SubscriptionType.objects.create(**subtrype3_fields)
+        st.SubscriptionType.objects.create(**subtrype4_fields)
         depot1_fields = {
             "code": "D1",
             "name": "Toblerplatz",
@@ -147,38 +153,11 @@ class Command(BaseCommand):
             "description": "Hinter dem Restaurant Cube",
             "contact": member_1,
         }
-        depot1 = jm.Depot.objects.create(**depot1_fields)
-        depot2 = jm.Depot.objects.create(**depot2_fields)
-        sub_1_fields = {
-            "depot": depot1,
-            "primary_member": member_1,
-            "future_depot": None,
-            "active": True,
-            "activation_date": "2017-03-27",
-            "deactivation_date": None,
-            "creation_date": "2017-03-27",
-            "start_date": "2018-01-01",
-        }
-        sub_2_fields = {
-            "depot": depot2,
-            "primary_member": member_2,
-            "future_depot": None,
-            "active": True,
-            "activation_date": "2017-03-27",
-            "deactivation_date": None,
-            "creation_date": "2017-03-27",
-            "start_date": "2018-01-01",
-        }
-        subscription_1 = jm.Subscription.objects.create(**sub_1_fields)
-        member_1.subscription = subscription_1
-        member_1.save()
-        subscription_2 = jm.Subscription.objects.create(**sub_2_fields)
-        member_2.subscription = subscription_2
-        member_2.save()
-        jm.TSST.objects.create(subscription=subscription_1, type=subtype1)
-        jm.TSST.objects.create(subscription=subscription_2, type=subtype3)
-        jm.TFSST.objects.create(subscription=subscription_1, type=subtype1)
-        jm.TFSST.objects.create(subscription=subscription_2, type=subtype3)
+        depot1 = Depot.objects.create(**depot1_fields)
+        depot2 = Depot.objects.create(**depot2_fields)
+
+        subscription_1 = ja_mgmt.create_subscription("2018-01-01", depot1, {subtype1:1}, member_1)
+        subscription_2 = ja_mgmt.create_subscription("2018-01-01", depot2, {subtype3:1}, member_2)
 
         area1_fields = {
             "name": "Abpacken",
@@ -196,10 +175,10 @@ class Command(BaseCommand):
             "coordinator": member_2,
             "show_coordinator_phonenumber": False,
         }
-        area_1 = jm.ActivityArea.objects.create(**area1_fields)
+        area_1 = ActivityArea.objects.create(**area1_fields)
         area_1.members.set([member_2])
         area_1.save()
-        area_2 = jm.ActivityArea.objects.create(**area2_fields)
+        area_2 = ActivityArea.objects.create(**area2_fields)
         area_2.members.set([member_1])
         area_2.save()
         type1_fields = {
@@ -218,8 +197,8 @@ class Command(BaseCommand):
             "duration": 2,
             "location": "auf dem Hof",
         }
-        type_1 = jm.JobType.objects.create(**type1_fields)
-        type_2 = jm.JobType.objects.create(**type2_fields)
+        type_1 = JobType.objects.create(**type1_fields)
+        type_2 = JobType.objects.create(**type2_fields)
         job1_all_fields = {
             "slots": 10,
             "time": utils.timezone.now(),
@@ -334,13 +313,13 @@ class Command(BaseCommand):
         csm.SubscriptionContentFutureItem.objects.create(**subcontentitem2_fields)
 
         # add extra subscriptions (Zusatzabos)
-        extra_sub_cat1 = jm.ExtraSubscriptionCategory.objects.create(
+        extra_sub_cat1 = ExtraSubscriptionCategory.objects.create(
             name="Spezialkäse",
             description="Spezialkäse für Waghalsige Käseliebhaber",
             sort_order=1,
             visible=True,
         )
-        extra_sub_type1 = jm.ExtraSubscriptionType.objects.create(
+        extra_sub_type1 = ExtraSubscriptionType.objects.create(
             name="Spezialkäse Einheitsgrösse",
             size="Einheitsgrösse",
             description="Einmal pro Monat Überraschunskäse",
@@ -348,7 +327,7 @@ class Command(BaseCommand):
             category_id=extra_sub_cat1.id,
             visible=True,
         )
-        jm.ExtraSubBillingPeriod.objects.create(
+        ExtraSubBillingPeriod.objects.create(
             start_day=1,
             start_month=1,
             end_day=31,
