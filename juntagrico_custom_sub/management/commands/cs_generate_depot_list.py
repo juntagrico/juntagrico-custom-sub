@@ -37,8 +37,6 @@ class Command(BaseCommand):
                     deliveryProducts.append(renamedProduct)
             else:
                 deliveryProducts.append(product)
-        for depot in depots:
-            depot.fill_overview_cache()
         renderdict = {
             'depots': depots,
             'products': deliveryProducts,

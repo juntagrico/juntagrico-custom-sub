@@ -36,12 +36,8 @@
         }
 
         .depot-table th.name {
-            text-align: left;
-            padding-left: 0.2em;
-        }
-
-        .depot-table th.name {
             text-align: center;
+            padding-left: 0.2em;
         }
 
         .depot-table td {
@@ -54,7 +50,7 @@
             border: none;
         }
 
-        .depot-table td .even {
+        .even {
             background-color: #7aaae0;
         }
 
@@ -86,10 +82,10 @@
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
         {% for product in products %}
-        <th style="word-wrap: break-word;width:250px">{{product.name}}</th>
+        <th style="word-wrap: break-word;">{{product.name}}</th>
         {% endfor %}
-        <th style="width:200px">Abo Abgeholt</th>
-        {% for sub in depot.subscription_cache.all %}
+        <th>Abo Abgeholt</th>
+        {% for sub in depot.active_subscriptions %}
         <tr>
             <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.last_name}}</td>
             {% for product in products %}
@@ -97,7 +93,7 @@
                 {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
                     {{sub.content.amounts_for_products|get_item:product}} </span> {% endif %}</td>
             {% endfor %}
-            <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}" style="width:200px"></td>
+            <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
         </tr>
         {% endfor %}
         <tr>
