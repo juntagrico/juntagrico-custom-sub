@@ -57,7 +57,7 @@
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "depot" %}</th>
         {% for product in products %}
-        <th>{{product.name}}</th>
+        <th>{{product.name|safe}}</th>
         {% endfor %}
         {% for depot in depot_list%}
         <tr>

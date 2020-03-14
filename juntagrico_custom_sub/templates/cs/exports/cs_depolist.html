@@ -82,7 +82,7 @@
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
         {% for product in products %}
-        <th style="word-wrap: break-word;">{{product.name}}</th>
+        <th style="word-wrap: break-word;">{{product.name|safe}}</th>
         {% endfor %}
         <th>Abo Abgeholt</th>
         {% for sub in depot.active_subscriptions %}
