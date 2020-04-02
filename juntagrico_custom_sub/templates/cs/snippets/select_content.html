@@ -9,7 +9,7 @@
     <div class="form-group row" {% if product.amount_in_subscription == 0 and not product.user_editable %}
         style="display: none" {% endif %}>
         <div class="col-md-6">
-            <div>{{ product.display_units }} {{ product.unit_name }} {{ product.name }}</div>
+            <div>{{ product.display_units }} {{ product.unit_name }} {{ product.name|striptags }}</div>
             <small>entspricht {{ product.units }} {% cs_vocabulary "base_unit" %}</small>
         </div>
         <div class="col-md-6">
