@@ -34,7 +34,7 @@ class SubscriptionContent(models.Model):
             try:
                 amount = prod.amount
                 if (amount>0):
-                    result.append(str(amount * prod.product.unit_multiplier * prod.product.units) +" " + prod.product.unit_name +" "+ strip_tags(prod.product.name))
+                    result.append(str(int(amount * prod.product.unit_multiplier * prod.product.units)) +" " + prod.product.unit_name +" "+ strip_tags(prod.product.name))
             except ObjectDoesNotExist:
                 pass
         return result
@@ -46,7 +46,7 @@ class SubscriptionContent(models.Model):
             try:
                 amount = prod.amount
                 if (amount>0):
-                    result.append(str(amount * prod.product.unit_multiplier * prod.product.units) +" " + prod.product.unit_name +" "+ strip_tags(prod.product.name))
+                    result.append(str(int(amount * prod.product.unit_multiplier * prod.product.units)) +" " + prod.product.unit_name +" "+ strip_tags(prod.product.name))
             except ObjectDoesNotExist:
                 pass
         return result 
