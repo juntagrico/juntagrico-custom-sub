@@ -50,9 +50,18 @@ def new_to_dict(self):
     result["custom_prod"] = self.custom_prod
     return result
 
-
 sessions.CSSessionObject.__init__ = new_init
 sessions.CSSessionObject.to_dict = new_to_dict
+
+def simple_get_size_name(types=[]):
+    size_dict = []
+    for type in types.all():
+        size_dict.append(type.size.name+" "+type.size.product.name)
+    if len(size_dict) > 0:
+        return '<br>'.join(size_dict)
+    return _('kein/e/n {0}').format(Config.vocabulary('subscription'))
+
+Subscription.get_size_name = simple_get_size_name
 
 
 def new_next_page(self):
