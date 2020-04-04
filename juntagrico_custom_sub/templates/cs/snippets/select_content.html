@@ -3,7 +3,7 @@
 {% load l10n %}
 <p>Dein {{ future_subscription_size }} {% cs_vocabulary "base_unit" %} {% vocabulary "subscription" %} enthält folgende
     Produkte:</p>
-<p id="remainingUnits" style="visibility: hidden;">placeholder text</p>
+<p id="remainingUnits">placeholder text</p>
 <form method="post" action=""> {% csrf_token %}
     {% for product in products %}
     <div class="form-group row" {% if product.amount_in_subscription == 0 and not product.user_editable %}
@@ -64,14 +64,15 @@
         var remaining = {{ future_subscription_size }} - getTotalUsedUnits();
         $("#formSubmit").attr("disabled", remaining != 0);
         if (remaining == 0) {
-            $('#remainingUnits').css("visibility", "hidden");
+            $('#remainingUnits').text("Dein {% vocabulary 'subscription' %} ist vollständig");
+            $('#remainingUnits').removeClass("text-danger").addClass("text-success");
         }
         else if (remaining > 0) {
             $('#remainingUnits').text("Noch " + remaining + " {% cs_vocabulary 'base_unit' %} zu verteilen");
-            $('#remainingUnits').css("visibility", "visible");
+            $('#remainingUnits').removeClass("text-success").addClass("text-danger");
         } else {
             $('#remainingUnits').text("Dein Abo wurde kleiner. Bitte " + (-remaining) + " {% cs_vocabulary 'base_unit' %} entfernen.");
-            $('#remainingUnits').css("visibility", "visible");
+            $('#remainingUnits').removeClass("text-success").addClass("text-danger");
         }
     };
 
