@@ -55,13 +55,17 @@ class SubscriptionContent(models.Model):
     def content_changed(self):
         changed = False
         products = Product.objects.all().order_by('id')
+        currentProducts = self.products.all()
+        futureProducts = self.future_products.all()
         for prod in products:
-            if  not (self.products.filter(product=prod).exists()) and not (self.future_products.filter(product=prod).exists()):
+            current = next((x for x in currentProducts if x.product == prod), None)
+            future = next((x for x in futureProducts if x.product == prod), None)
+            if  not (current) and not (future):
                 continue
-            if (not self.products.filter(product=prod).exists()) or not (self.future_products.filter(product=prod).exists()):
+            if (not current) or not (future):
                 changed = True
                 break
-            if(self.products.get(product=prod).amount != self.future_products.get(product=prod).amount):
+            if(current.amount != future.amount):
                 changed = True
                 break
         return changed
