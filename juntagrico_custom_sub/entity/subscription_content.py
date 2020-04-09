@@ -17,7 +17,7 @@ class SubscriptionContent(models.Model):
     @property
     def amounts_for_products(self):
         result = {}
-        products = Product.objects.all().order_by('id')
+        products = Product.objects.all().order_by('code')
         for prod in products:
             try:
                 amount = self.products.get(product=prod).amount
@@ -30,7 +30,7 @@ class SubscriptionContent(models.Model):
     @property
     def display_content(self):
         result = []
-        for prod in self.products.all():
+        for prod in self.products.all().order_by('product__code'):
             try:
                 amount = prod.amount
                 if (amount>0):
@@ -42,7 +42,7 @@ class SubscriptionContent(models.Model):
     @property
     def display_future_content(self):
         result = []
-        for prod in self.future_products.all():
+        for prod in self.future_products.all().order_by('product__code'):
             try:
                 amount = prod.amount
                 if (amount>0):

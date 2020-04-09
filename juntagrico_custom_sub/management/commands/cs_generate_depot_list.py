@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 'not the specified day for depot list generation, use --force to override')
             return
         depots = CsDepot.objects.all().order_by('code')
-        products = Product.objects.all().order_by('id')
+        products = Product.objects.all().order_by('code')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
         #Rename products based on their name in the latest delivery

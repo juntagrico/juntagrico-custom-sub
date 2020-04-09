@@ -1,4 +1,5 @@
 from django.db import models
+from django.core import validators
 from juntagrico.entity.subtypes import SubscriptionSize
 from django.utils.translation import gettext as _
 
@@ -9,7 +10,7 @@ class Product(models.Model):
     unit_name = models.CharField("Name Grösse",max_length=100,default="")
     mandatory_for_sizes = models.ManyToManyField(SubscriptionSize,related_name='mandatory_products',through='juntagrico_custom_sub.SubscriptionSizeMandatoryProducts')
     user_editable = models.BooleanField("Menge durch Nutzer veränderbar",default=True)
-    
+    code = models.CharField('Sortier-Code', max_length=100,default='1', validators=[validators.validate_slug], unique=True)
     @property
     def display_units(self):
         return int(self.unit_multiplier * self.units)

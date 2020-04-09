@@ -225,7 +225,7 @@ def subscription_select_content(request, cs_session, subscription_id):
     mand_products = SubscriptionSizeMandatoryProducts.objects.filter(
         subscription_size__in=[fst.size for fst in fut_subs_types.keys()]
     ).values_list("product_id", flat=True)
-    products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by("user_editable")
+    products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by("user_editable","code")
     if "saveContent" in request.POST:
         custom_prods = parse_selected_custom_products(request.POST, products)
         error = new_content_valid(fut_subs_types, custom_prods, products)
@@ -268,7 +268,7 @@ def content_edit_result(request, subscription_id):
 
 @create_subscription_session
 def initial_select_content(request, cs_session):
-    products = Product.objects.all().order_by("user_editable")
+    products = Product.objects.all().order_by("user_editable","code")
     if request.method == "POST":
         # create dict with subscription type -> selected amount
         custom_prods = parse_selected_custom_products(request.POST, products)
