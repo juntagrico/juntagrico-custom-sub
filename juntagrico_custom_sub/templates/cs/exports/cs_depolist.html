@@ -11,10 +11,14 @@
             size: a4 landscape;
 
             @frame content_frame {
-                left: 50pt;
-                width: 742pt;
+                left: 30pt;
+                width: 782pt;
                 top: 50pt;
                 height: 495pt;
+            }
+            @frame footer_frame {           /* Another static Frame */
+                -pdf-frame-content: footer_content;
+                left: 30pt; width: 782pt; top: 545pt; height: 20pt;
             }
         }
 
@@ -72,6 +76,10 @@
         h2 {
             margin-bottom: 0;
         }
+
+        #footer_content {
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -109,8 +117,13 @@
     </table>
     <h3>{% trans "Mitteilung" %}:</h3>
     <p>{{ comment }}</p>
-    <div class="page-break"></div>
+    {% if not forloop.last %}
+        <div class="page-break"></div>
+    {% endif %}
     {% endfor %}
+    <div id="footer_content">
+        <pdf:pagenumber>/<pdf:pagecount>
+    </div>
 </body>
 
 </html>
