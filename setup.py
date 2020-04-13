@@ -16,7 +16,7 @@ def get_requirements(requirements_file):
 
 setup(
     name='juntagrico-custom-sub',
-    version='0.1.10',
+    version='0.2.0',
     packages=find_packages(),
     include_package_data=True,
     license='LPGLv3',  # example license

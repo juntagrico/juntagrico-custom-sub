@@ -10,13 +10,12 @@ from django.utils import timezone
 from juntagrico import mailer as ja_mailer
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
-from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
-from juntagrico.mailer import MemberNotification
+from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription
+from juntagrico.mailer import membernotification
 from juntagrico.entity.subs import Subscription
 from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionType
 from juntagrico.util import management as ja_mgmt
 from juntagrico.util import return_to_previous_location, sessions, temporal
-from juntagrico.util.form_evaluation import selected_subscription_types
 from juntagrico.util.management import replace_subscription_types
 from juntagrico.util.management_list import get_changedate
 from juntagrico.util.views_admin import subscription_management_list
@@ -27,6 +26,8 @@ from juntagrico_custom_sub.models import (
     SubscriptionSizeMandatoryProducts
 )
 from juntagrico_custom_sub.util.sub_content import calculate_future_size, new_content_valid
+from juntagrico.forms import SubscriptionTypeSelectForm,SubscriptionTypeEditForm
+from django.forms import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -112,82 +113,76 @@ class CustomCSSummaryView(CSSummaryView):
 
         # send notifications
         if creation_data['created']:
-            MemberNotification.welcome(member, creation_data['password'])
+            membernotification.welcome(member, creation_data['password'])
         # associate custom products with subscription
         if subscription is not None:
             add_products_to_subscription(subscription.id, cs_session.custom_prod, SubscriptionContentItem)
         # finish registration
         return cs_finish(request)
 
+class CsSubscriptionTypeEditForm(SubscriptionTypeEditForm):
+    """
+    Overwrites original method in juntagrico
+    implements stricter validation
+    """
+    def clean(self):
+        selected = self.get_selected()
+        if(quantity_error(selected)):
+            raise ValidationError(quantity_error(selected), code='quantity_error')
+        return super().clean()
 
 @create_subscription_session
 def initial_select_size(request, cs_session, **kwargs):
-    if request.method == "POST":
-        # create dict with subscription type -> selected amount
-        selected = selected_subscription_types(request.POST)
-        cs_session.subscriptions = selected
-        cs_session.custom_prod = {}
-        err_msg = quantity_error(selected)
-        if not err_msg or request.POST.get("subscription") == "-1":
-            return redirect(cs_session.next_page())
-        else:
-            cs_session.error = err_msg
-            return redirect(reverse("cs-subscription"))
+    if request.method == 'POST':
+        form = SubscriptionTypeSelectForm(cs_session.subscriptions, request.POST)
+        if form.is_valid():
+            err_msg = quantity_error(form.get_selected())
+            if not err_msg or request.POST.get("subscription") == "-1":
+                cs_session.subscriptions = form.get_selected()
+                cs_session.custom_prod = {}
+                return redirect(cs_session.next_page())
+            else:
+                cs_session.error = err_msg
+                form = SubscriptionTypeSelectForm(cs_session.subscriptions)
+    else:
+        form = SubscriptionTypeSelectForm(cs_session.subscriptions)
+
     render_dict = {
-        "selected_subscriptions": cs_session.subscriptions,
-        "hours_used": Config.assignment_unit() == "HOURS",
-        "products": SubscriptionProduct.objects.all(),
+        'error': cs_session.error,
+        'form': form,
+        'subscription_selected': sum(form.get_selected().values()) > 0,
+        'hours_used': Config.assignment_unit() == 'HOURS',
     }
-    render_dict = handle_error(render_dict, cs_session)
     return render(request, "cs/initial_select_size.html", render_dict)
 
 
 @primary_member_of_subscription
-@create_subscription_session
-def size_change(request, cs_session, subscription_id):
+def size_change(request, subscription_id):
     """
     change the size of a subscription
-    overwrites original method in juntagrico
-    implements stricter validation
+    stricter validation and redirect to content edit
     """
     subscription = get_object_or_404(Subscription, id=subscription_id)
     saved = False
-    share_error = False
-    if request.method == "POST" and int(timezone.now().strftime("%m")) <= Config.business_year_cancelation_month():
-        # create dict with subscription type -> selected amount
-        selected = selected_subscription_types(request.POST)
-        # check if members of sub have enough shares
-        err_msg = quantity_error(selected)
-        if subscription.all_shares < sum([sub_type.shares * amount for sub_type, amount in selected.items()]):
-            share_error = True
-        elif not err_msg:
-            cs_session.subscriptions = selected
+    err_msg = None
+    if request.method == 'POST':
+        form = CsSubscriptionTypeEditForm(subscription, request.POST)
+        if form.is_valid():           
+            replace_subscription_types(subscription, form.get_selected())
+            saved = True
             return redirect("content_edit", subscription_id=subscription_id)
-        else:
-            cs_session.error = err_msg
-            return redirect("size-change", subscription_id=subscription_id)
-    products = SubscriptionProduct.objects.all()
+    else:
+        form = CsSubscriptionTypeEditForm(subscription)
+
     renderdict = get_menu_dict(request)
-    renderdict.update(
-        {
-            "saved": saved,
-            "subscription": subscription,
-            "shareerror": share_error,
-            "hours_used": Config.assignment_unit() == "HOURS",
-            "next_cancel_date": temporal.next_cancelation_date(),
-            "selected_subscription": subscription.future_types.all()[0].id,
-            "products": products,
-        }
-    )
-
-    if cs_session.error:
-        template = get_template("cs/snippets/error_message.html")
-        render_result = template.render({"error": cs_session.error})
-        renderdict["messages"] = [render_result]
-        cs_session.error = None
-
-    return render(request, "size_change.html", renderdict)
-
+    renderdict.update({
+        'form': form,
+        'saved': saved,
+        'subscription': subscription,
+        'hours_used': Config.assignment_unit() == 'HOURS',
+        'next_cancel_date': temporal.next_cancelation_date(),
+    })
+    return render(request, 'size_change.html', renderdict)
 
 def quantity_error(selected):
     """
