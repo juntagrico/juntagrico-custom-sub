@@ -59,7 +59,7 @@
         }
 
         .even {
-            background-color: #7aaae0;
+            background-color: #bfddff;
         }
 
         .contact {
@@ -88,11 +88,13 @@
 
 <body>
     {% for depot in depots %}
+    <h1>Basimilch Aboliste</h1>
     <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
     <div class="contact">
         <div class="no-padding"><b>{% blocktrans %}{{ v_depot }}-Betreuung{% endblocktrans %}</b></div>
         <div class="no-padding">{{ depot.contact.first_name }} {{depot.contact.last_name}}</div>
         <div class="no-padding">{{ depot.contact.email }}</div>
+        <div class="no-padding">{{ depot.contact.phone }}</div>
     </div>
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
@@ -102,7 +104,7 @@
         <th style="width: 70px;">Abo <br> Abgeholt</th>
         {% for sub in depot.active_subscriptions|dictsort:"primary_member.last_name" %}
         <tr>
-            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.last_name}}</td>
+            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.first_name.0}}. {{ sub.primary_member.last_name}}</td>
             {% for product in products %}
             <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
                 {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
