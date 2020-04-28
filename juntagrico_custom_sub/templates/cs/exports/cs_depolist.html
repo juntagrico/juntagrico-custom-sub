@@ -104,7 +104,7 @@
         <th style="width: 70px;">Abo <br> Abgeholt</th>
         {% for sub in depot.active_subscriptions|dictsort:"primary_member.last_name" %}
         <tr>
-            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.first_name.0}}. {{ sub.primary_member.last_name}}</td>
+            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.first_name.0}}.{{ sub.primary_member.last_name}}</td>
             {% for product in products %}
             <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
                 {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
