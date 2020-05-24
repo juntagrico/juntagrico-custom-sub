@@ -9,15 +9,21 @@
     <style>
         @page {
             size: a4 landscape;
+
             @frame content_frame {
                 left: 30pt;
                 width: 782pt;
                 top: 50pt;
                 height: 495pt;
             }
-            @frame footer_frame {           /* Another static Frame */
+
+            @frame footer_frame {
+                /* Another static Frame */
                 -pdf-frame-content: footer_content;
-                left: 30pt; width: 782pt; top: 545pt; height: 20pt;
+                left: 30pt;
+                width: 782pt;
+                top: 545pt;
+                height: 20pt;
             }
         }
 
@@ -56,6 +62,7 @@
         .even {
             background-color: #bfddff;
         }
+
         #footer_content {
             text-align: right;
         }
@@ -87,10 +94,21 @@
             {% endfor %}
         </tr>
     </table>
-    {% if not forloop.last %}
-        <div class="page-break"></div>
-    {% endif %}
     {% endfor %}
+    <table class="depot-table" style="margin-top: 30px;">
+        <th class="name">Overall</th>
+        {% for product in products %}
+        <th>{{product.name|safe}}</th>
+        {% endfor %}
+        <tr>
+            <td class="total">
+                Total
+            </td>
+            {% for amount in overallTotals %}
+            <td class="total">{{amount}}</td>
+            {% endfor %}
+        </tr>
+    </table>
     <div id="footer_content">
         <pdf:pagenumber>/<pdf:pagecount>
     </div>

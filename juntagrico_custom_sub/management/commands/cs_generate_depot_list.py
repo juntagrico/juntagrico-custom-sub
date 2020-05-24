@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 from juntagrico.util.pdf import render_to_pdf_storage
 from juntagrico_custom_sub.models import *
-from juntagrico.models import *
 from juntagrico.dao.depotdao import DepotDao
+from juntagrico.dao.subscriptiondao import SubscriptionDao
+from juntagrico.mailer import MemberNotification
 from juntagrico.config import Config
 from django.utils import timezone
 import copy
@@ -23,6 +24,14 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
+        for subscription in SubscriptionDao.subscritions_with_future_depots():
+            subscription.depot = subscription.future_depot
+            subscription.future_depot = None
+            subscription.save()
+            emails = []
+            for member in subscription.recipients:
+                emails.append(member.email)
+            MemberNotification.depot_changed(emails, subscription.depot)
         depots = CsDepot.objects.all().order_by('code')
         products = Product.objects.all().order_by('code')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
@@ -37,10 +46,33 @@ class Command(BaseCommand):
                     deliveryProducts.append(renamedProduct)
             else:
                 deliveryProducts.append(product)
-        renderdict = {
+
+        overallTotal = [0]*len(deliveryProducts)
+        grouped_depots = {}
+        for depot in depots:
+            grouped_depots.setdefault(depot.weekday_name, []).append(depot)
+        totals = {}
+        for weekday,depot_list in grouped_depots.items():
+            total = [0]*len(deliveryProducts)
+            for depot in depot_list:
+                for idx,prod in enumerate(deliveryProducts):
+                    total[idx] = total[idx]+depot.product_totals[prod]
+                    overallTotal[idx] = overallTotal[idx]+total[idx]
+            totals[weekday] = total
+        
+        renderdict_depotlist = {
             'depots': depots,
             'products': deliveryProducts,
             'comment': latest_delivery.delivery_comment
         }
         render_to_pdf_storage('cs/exports/cs_depolist.html',
-                              renderdict, 'depotlist.pdf')
+                              renderdict_depotlist, 'depotlist.pdf')
+
+        renderdict_packlist = {
+            'depots': grouped_depots,
+            'products': deliveryProducts,
+            'totals': totals,
+            'overallTotals': overallTotal
+        }
+        render_to_pdf_storage('cs/exports/cs_packlist.html',
+                              renderdict_packlist, 'depot_overview.pdf')
