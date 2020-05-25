@@ -57,7 +57,7 @@ class Command(BaseCommand):
             for depot in depot_list:
                 for idx,prod in enumerate(deliveryProducts):
                     total[idx] = total[idx]+depot.product_totals[prod]
-                    overallTotal[idx] = overallTotal[idx]+total[idx]
+                    overallTotal[idx] = overallTotal[idx]+depot.product_totals[prod]
             totals[weekday] = total
         
         renderdict_depotlist = {
