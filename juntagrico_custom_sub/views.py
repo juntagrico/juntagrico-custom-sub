@@ -194,11 +194,12 @@ def quantity_error(selected):
     validates the selected quantities for Basimilch's usecase
     selected is a dictionnary with SubscriptionType objects as keys and amounts as values
     """
-    total_liters = sum([x * y for x, y in zip(selected.values(), [4, 8, 2])])
-    if total_liters < 4:
-        return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
     selected4 = selected[SubscriptionType.objects.get(size__units=4)]
     selected8 = selected[SubscriptionType.objects.get(size__units=8)]
+    selected2 = selected[SubscriptionType.objects.get(size__units=2)]
+    total_liters = selected4*4+selected8*8+selected2*2
+    if total_liters < 4:
+        return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
     required8 = total_liters // 8
     required4 = (total_liters % 8) // 4
     if not (selected8 == required8 and selected4 == required4):
