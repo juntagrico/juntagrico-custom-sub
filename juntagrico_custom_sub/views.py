@@ -116,6 +116,7 @@ class CustomCSSummaryView(CSSummaryView):
         # associate custom products with subscription
         if subscription is not None:
             add_products_to_subscription(subscription.id, cs_session.custom_prod, SubscriptionContentItem)
+            add_products_to_subscription(subscription.id, cs_session.custom_prod, SubscriptionContentFutureItem)
         # finish registration
         return cs_finish(request)
 
