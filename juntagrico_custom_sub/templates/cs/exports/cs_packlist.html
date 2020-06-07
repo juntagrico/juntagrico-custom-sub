@@ -70,6 +70,7 @@
 </head>
 
 <body>
+    Generiert am: {% now "d.m.Y H:i" %}
     {% for weekday,depot_list in depots.items %}
     <h2>{{ weekday }}</h2>
     <table class="depot-table" repeat="1">
