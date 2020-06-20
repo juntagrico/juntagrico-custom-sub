@@ -9,7 +9,10 @@
     <style>
         @page {
             size: a4 landscape;
-
+            @frame header_frame {           /* Static Frame */
+                -pdf-frame-content: header_content;
+                left: 30pt; width: 782pt; top: 50pt; height: 20pt;
+            }
             @frame content_frame {
                 left: 30pt;
                 width: 782pt;
@@ -83,10 +86,16 @@
         #footer_content {
             text-align: right;
         }
+        #header_content {
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
+    <div id="header_content">
+        Erstellt am: {% now "d.m.Y H:i" %}
+    </div>
     {% for depot in depots %}
     <h1>Basimilch Aboliste</h1>
     <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
