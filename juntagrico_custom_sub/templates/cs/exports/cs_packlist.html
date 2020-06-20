@@ -22,17 +22,8 @@
             @frame content_frame {
                 left: 30pt;
                 width: 782pt;
-                top: 50pt;
-                height: 495pt;
-            }
-
-            @frame footer_frame {
-                /* Another static Frame */
-                -pdf-frame-content: footer_content;
-                left: 30pt;
-                width: 782pt;
-                top: 545pt;
-                height: 20pt;
+                top: 20pt;
+                height: 565pt;
             }
         }
 
@@ -71,10 +62,6 @@
         .even {
             background-color: #bfddff;
         }
-
-        #footer_content {
-            text-align: right;
-        }
         #header_content {
             text-align: right;
         }
@@ -111,10 +98,6 @@
     </table>
     {% endfor %}
     <table class="depot-table" style="margin-top: 5px;">
-        <th class="name">Overall</th>
-        {% for product in products %}
-        <th>{{product.name|safe}}</th>
-        {% endfor %}
         <tr>
             <td class="total">
                 Total
@@ -124,9 +107,6 @@
             {% endfor %}
         </tr>
     </table>
-    <div id="footer_content">
-        <pdf:pagenumber>/<pdf:pagecount>
-    </div>
 </body>
 
 </html>
