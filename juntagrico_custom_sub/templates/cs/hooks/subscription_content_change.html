@@ -6,13 +6,9 @@
     </div>
     <div class="col-md-4">
         {% trans "Deine Bedürfnisse haben sich geändert und du möchtest die Zusammenstellung deines Abos ändern?" %}
-        {% trans "Du kannst diese jederzeit ändern - die Änderung werden zwei mal jahrlich jeweils im Sommer und im Winter aktiv." %}
+        {% trans "Du kannst diese jederzeit ändern - die Änderung werden drei mal jahrlich jeweils Anfang Jahr, ende April und mitte August aktiv." %}
     </div>
     <div class="col-md-4">
-        {% trans "Nächstmögliches Datum" %}:
-        <br/>
-        {{ next_business_year |date:"d.m.Y" }}
-        <br/>
         {% trans "Zukünftig" %}:
         <br/>
         {% for content in subscription.content.display_future_content %}
