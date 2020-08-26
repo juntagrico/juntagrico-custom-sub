@@ -231,30 +231,35 @@ class Command(BaseCommand):
             "units": 1,
             "unit_multiplier": 1,
             "unit_name": "Liter",
+            "code": "A1",
         }
         prod2_fields = {
             "name": "Zusatzkäse",
             "units": 2,
             "unit_multiplier": 100,
             "unit_name": "Gramm",
+            "code": "A2"
         }
         prod3_fields = {
             "name": "Quark",
             "units": 1,
             "unit_multiplier": 350,
             "unit_name": "Gramm",
+            "code": "A3"
         }
         prod4_fields = {
             "name": "Fruchtjoghurt",
             "units": 0.5,
             "unit_multiplier": 1000,
             "unit_name": "Gramm",
+            "code": "A4"
         }
         prod5_fields = {
             "name": "Naturejoghurt",
             "units": 0.5,
             "unit_multiplier": 1000,
             "unit_name": "Gramm",
+            "code": "A5"
         }
         prod6_fields = {
             "name": "Wochenkäse klein",
@@ -262,6 +267,7 @@ class Command(BaseCommand):
             "unit_multiplier": 100,
             "unit_name": "Gramm",
             "user_editable": False,
+            "code": "A6"
         }
         prod7_fields = {
             "name": "Wochenkäse gross",
@@ -269,6 +275,7 @@ class Command(BaseCommand):
             "unit_multiplier": 100,
             "unit_name": "Gramm",
             "user_editable": False,
+            "code": "A7"
         }
         csm.Product.objects.create(**prod1_fields)
         csm.Product.objects.create(**prod2_fields)
