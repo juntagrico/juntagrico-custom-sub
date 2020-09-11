@@ -11,6 +11,6 @@ class CsDepot(Depot):
         products = Product.objects.all().order_by('code')
         amount_of_product = {}
         for product in products:
-            productAmount = self.subscription_set.filter(content__products__product__id=product.id).aggregate(Sum('content__products__amount'))['content__products__amount__sum'] or 0
+            productAmount = self.subscription_set.filter(active=True, content__products__product__id=product.id).aggregate(Sum('content__products__amount'))['content__products__amount__sum'] or 0
             amount_of_product[product] = productAmount
         return amount_of_product
