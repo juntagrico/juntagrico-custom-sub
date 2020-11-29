@@ -24,14 +24,6 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
-        for subscription in SubscriptionDao.subscritions_with_future_depots():
-            subscription.depot = subscription.future_depot
-            subscription.future_depot = None
-            subscription.save()
-            emails = []
-            for member in subscription.recipients:
-                emails.append(member.email)
-            MemberNotification.depot_changed(emails, subscription.depot)
         depots = CsDepot.objects.all().order_by('code')
         products = Product.objects.all().order_by('code')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
