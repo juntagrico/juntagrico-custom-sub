@@ -1,7 +1,4 @@
-{% load config %}
-{% load i18n %}
-{% load common %}
-{% vocabulary "depot" as v_depot %}
+{% load config %}{% load i18n %}{% load common %}{% vocabulary "depot" as v_depot %}
 <html>
 
 <head>
@@ -10,21 +7,20 @@
         @page {
             size: a4 landscape;
 
-            @frame header_frame {
-                /* Another static Frame */
-                -pdf-frame-content: header_content;
-                left: 30pt;
-                width: 782pt;
-                top: 20pt;
-                height: 20pt;
-            }
+            @frame header_frame { /* Another static Frame */
+            -pdf-frame-content: header_content;
+            left: 30pt;
+            width: 782pt;
+            top: 20pt;
+            height: 20pt;
+        }
 
-            @frame content_frame {
-                left: 30pt;
-                width: 782pt;
-                top: 20pt;
-                height: 565pt;
-            }
+        @frame content_frame {
+        left: 30pt;
+        width: 782pt;
+        top: 20pt;
+        height: 565pt;
+        }
         }
 
         body {
@@ -62,6 +58,7 @@
         .even {
             background-color: #bfddff;
         }
+
         #header_content {
             text-align: right;
         }
@@ -69,44 +66,45 @@
 </head>
 
 <body>
-    <div id="header_content">
-        Generiert am: {% now "d.m.Y H:i" %}
-    </div>
-    {% for weekday,depot_list in depots.items %}
+<div id="header_content">
+    Generiert am: {% now "d.m.Y H:i" %}
+</div>
+{% for weekday,depot_list in depots.items %}
     <b>{{ weekday }}</b>
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "depot" %}</th>
         {% for product in products %}
-        <th>{{product.name|safe}}</th>
+            <th>{{ product.name|safe }}</th>
         {% endfor %}
-        {% for depot in depot_list%}
-        <tr>
-            <td style="white-space: pre;" class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name}}</td>
-            {% for product in products %}
-            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
-                {% if depot.product_totals|get_item:product != 0 %} <span>
-                    {{depot.product_totals|get_item:product}} </span> {% endif %}</td>
-            {% endfor %}
-        </tr>
+        {% for depot in depot_list %}
+            <tr>
+                <td style="white-space: pre;"
+                    class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name }}</td>
+                {% for product in products %}
+                    <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
+                        {% if depot.product_totals|get_item:product != 0 %} <span>
+                    {{ depot.product_totals|get_item:product }} </span> {% endif %}</td>
+                {% endfor %}
+            </tr>
         {% endfor %}
         <tr>
             <td class="total">Total</td>
             {% for amount in totals|get_item:weekday %}
-            <td class="total">{{amount}}</td>
+                <td class="total">{{ amount }}</td>
             {% endfor %}
         </tr>
     </table>
-    {% endfor %}
-    <table class="depot-table" style="margin-top: 5px;">
-        <tr>
-            <td class="total">
-                Total
-            </td>
-            {% for amount in overallTotals %}
-            <td class="total">{{amount}}</td>
-            {% endfor %}
-        </tr>
-    </table>
+{% endfor %}
+<table class="depot-table" style="margin-top: 5px;">
+    <tr>
+        <td class="total">
+            Total
+        </td>
+        {% for amount in overallTotals %}
+            <td class="total">{{ amount }}</td>
+        {% endfor %}
+    </tr>
+</table>
 </body>
 
 </html>

@@ -1,2 +1,4 @@
-juntagrico==1.2.2
-dj-database-url==0.5.*
+-r ./requirements.txt
+git+http://github.com/juntagrico/juntagrico.git
+coverage
+flake8

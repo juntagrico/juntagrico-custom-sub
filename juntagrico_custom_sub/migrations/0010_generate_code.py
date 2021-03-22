@@ -2,14 +2,15 @@
 
 from django.db import migrations
 
+
 def gen_sort_code(apps, schema_editor):
     Products = apps.get_model('juntagrico_custom_sub', 'product')
     for row in Products.objects.all():
         row.code = str(row.id)
         row.save(update_fields=['code'])
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('juntagrico_custom_sub', '0009_product_code'),
     ]

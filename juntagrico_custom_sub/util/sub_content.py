@@ -8,7 +8,7 @@ def new_content_valid(future_types, custom_prods, products):
         minimalAmountForProduct = 0
         for ft in future_types:
             for mandatoryProduct in SubscriptionSizeMandatoryProducts.objects.filter(
-                product=product, subscription_size=ft.size
+                    product=product, subscription_size=ft.size
             ):
                 minimalAmountForProduct += mandatoryProduct.amount
         productAmount = 0 if product not in custom_prods else custom_prods[product]

@@ -1,9 +1,11 @@
 .pflichtprod:hover {
     position: relative
 }
-.pflichtprod span{
+
+.pflichtprod span {
     display: none
 }
+
 .pflichtprod:hover span {
     padding: 0.1rem;
     display: block;

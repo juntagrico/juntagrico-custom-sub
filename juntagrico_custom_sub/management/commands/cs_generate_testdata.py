@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from django.core.management.base import BaseCommand
-
 from django import utils
+from django.core.management.base import BaseCommand
 from juntagrico import models as jm
 from juntagrico.entity import subtypes as st
-from juntagrico.entity.depot import Depot
-from juntagrico.entity.jobs import ActivityArea,JobType
-from juntagrico.entity.extrasubs import ExtraSubscriptionCategory,ExtraSubscriptionType
 from juntagrico.entity.billing import ExtraSubBillingPeriod
-from juntagrico_custom_sub import models as csm
+from juntagrico.entity.depot import Depot
+from juntagrico.entity.extrasubs import ExtraSubscriptionCategory, ExtraSubscriptionType
+from juntagrico.entity.jobs import ActivityArea, JobType
 from juntagrico.util import management as ja_mgmt
-import pytz  # noqa --> not importing creates naive time objects
+
+from juntagrico_custom_sub import models as csm
 
 
 class Command(BaseCommand):
@@ -156,8 +155,8 @@ class Command(BaseCommand):
         depot1 = Depot.objects.create(**depot1_fields)
         depot2 = Depot.objects.create(**depot2_fields)
 
-        subscription_1 = ja_mgmt.create_subscription("2018-01-01", depot1, {subtype1:1}, member_1)
-        subscription_2 = ja_mgmt.create_subscription("2018-01-01", depot2, {subtype3:1}, member_2)
+        subscription_1 = ja_mgmt.create_subscription("2018-01-01", depot1, {subtype1: 1}, member_1)
+        subscription_2 = ja_mgmt.create_subscription("2018-01-01", depot2, {subtype3: 1}, member_2)
 
         area1_fields = {
             "name": "Abpacken",

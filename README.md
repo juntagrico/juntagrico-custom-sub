@@ -1,8 +1,10 @@
 # juntagrico-custom_sub
 
-[![juntagrico-ci](https://github.com/juntagrico/juntagrico-billing/actions/workflows/juntagrico-ci.yml/badge.svg?branch=main&event=push)](https://github.com/juntagrico/juntagrico-billing/actions/workflows/juntagrico-ci.yml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f1e8af41b78f052add70/maintainability)](https://codeclimate.com/github/juntagrico/juntagrico-billing/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/f1e8af41b78f052add70/test_coverage)](https://codeclimate.com/github/juntagrico/juntagrico-billing/test_coverage)
-
+[![juntagrico-ci](https://github.com/juntagrico/juntagrico-custom-sub/actions/workflows/juntagrico-ci.yml/badge.svg?branch=main&event=push)](https://github.com/juntagrico/juntagrico-custom-sub/actions/workflows/juntagrico-ci.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/562e49b1e35490ac4058/maintainability)](https://codeclimate.com/github/juntagrico/juntagrico-custom-sub/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/562e49b1e35490ac4058/test_coverage)](https://codeclimate.com/github/juntagrico/juntagrico-custom-sub/test_coverage)
+[![Requirements Status](https://requires.io/github/juntagrico/juntagrico-custom-sub/requirements.svg?branch=main)](https://requires.io/github/juntagrico/juntagrico-custom-sub/requirements/?branch=main)
+[![image](https://img.shields.io/github/last-commit/juntagrico/juntagrico-custom-sub.svg)](https://github.com/juntagrico/juntagrico-custom-sub)
+[![image](https://img.shields.io/github/commit-activity/y/juntagrico/juntagrico-custom-sub)](https://github.com/juntagrico/juntagrico-custom-sub)
 This is an extension for juntagrico. You can find more information about juntagrico here
 (https://github.com/juntagrico/juntagrico).

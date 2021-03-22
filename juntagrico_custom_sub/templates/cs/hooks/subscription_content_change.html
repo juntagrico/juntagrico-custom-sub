@@ -1,16 +1,13 @@
-{% load i18n %}
-{% load config %}
+{% load i18n %}{% load config %}
 <div class="row mt-3">
     <div class="col-md-2">
         {% trans "Inhalt" %}
     </div>
     <div class="col-md-4">
-        {% trans "Deine Bedürfnisse haben sich geändert und du möchtest die Zusammenstellung deines Abos ändern?" %}
-        {% trans "Du kannst diese jederzeit ändern - die Änderung werden drei mal jahrlich jeweils Anfang Jahr, ende April und mitte August aktiv." %}
+        {% trans "Deine Bedürfnisse haben sich geändert und du möchtest die Zusammenstellung deines Abos ändern?" %} {% trans "Du kannst diese jederzeit ändern - die Änderung werden drei mal jahrlich jeweils Anfang Jahr, ende April und mitte August aktiv." %}
     </div>
     <div class="col-md-4">
-        {% trans "Zukünftig" %}:
-        <br/>
+        {% trans "Zukünftig" %}: <br/>
         {% for content in subscription.content.display_future_content %}
             {{ content }}<br/>
         {% endfor %}

@@ -1,5 +1,8 @@
 import os
+
 from setuptools import find_packages, setup
+
+import juntagrico_custom_sub
 
 ROOT_DIR = os.path.dirname(__file__)
 SOURCE_DIR = os.path.join(ROOT_DIR)
@@ -15,8 +18,8 @@ def get_requirements(requirements_file):
 
 
 setup(
-    name='juntagrico-custom-sub',
-    version='0.1.24',
+    name=juntagrico_custom_sub.name,
+    version=juntagrico_custom_sub.version,
     packages=find_packages(),
     include_package_data=True,
     license='LPGLv3',  # example license

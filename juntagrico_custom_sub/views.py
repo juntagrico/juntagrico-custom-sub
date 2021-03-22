@@ -6,14 +6,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
-from juntagrico import mailer as ja_mailer
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.decorators import create_subscription_session, primary_member_of_subscription
-from juntagrico.mailer import MemberNotification
 from juntagrico.entity.subs import Subscription
 from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionType
+from juntagrico.mailer import MemberNotification
 from juntagrico.util import management as ja_mgmt
 from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.form_evaluation import selected_subscription_types
@@ -22,10 +22,12 @@ from juntagrico.util.management_list import get_changedate
 from juntagrico.util.views_admin import subscription_management_list
 from juntagrico.views import get_menu_dict
 from juntagrico.views_create_subscription import CSSummaryView, cs_finish
-from juntagrico_custom_sub.models import (
-    Product, SubscriptionContent, SubscriptionContentFutureItem, SubscriptionContentItem,
-    SubscriptionSizeMandatoryProducts
-)
+
+from juntagrico_custom_sub.entity.product import Product
+from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
+from juntagrico_custom_sub.entity.subscription_content_future_item import SubscriptionContentFutureItem
+from juntagrico_custom_sub.entity.subscription_content_item import SubscriptionContentItem
+from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
 from juntagrico_custom_sub.util.sub_content import calculate_future_size, new_content_valid
 
 logger = logging.getLogger(__name__)
@@ -50,16 +52,19 @@ def new_to_dict(self):
     result["custom_prod"] = self.custom_prod
     return result
 
+
 sessions.CSSessionObject.__init__ = new_init
 sessions.CSSessionObject.to_dict = new_to_dict
+
 
 def simple_get_size_name(types=[]):
     size_dict = []
     for type in types.all():
-        size_dict.append(type.size.name+" "+type.size.product.name)
+        size_dict.append(type.size.name + " " + type.size.product.name)
     if len(size_dict) > 0:
         return '<br>'.join(size_dict)
     return _('kein/e/n {0}').format(Config.vocabulary('subscription'))
+
 
 Subscription.get_size_name = simple_get_size_name
 
@@ -104,7 +109,8 @@ class CustomCSSummaryView(CSSummaryView):
         # create subscription for member
         subscription = None
         if sum(cs_session.subscriptions.values()) > 0:
-            subscription = ja_mgmt.create_subscription(cs_session.start_date, cs_session.depot, cs_session.subscriptions, member)
+            subscription = ja_mgmt.create_subscription(cs_session.start_date, cs_session.depot,
+                                                       cs_session.subscriptions, member)
 
         # add co-members
         for co_member in cs_session.co_members:
@@ -198,7 +204,7 @@ def quantity_error(selected):
     selected4 = selected[SubscriptionType.objects.get(size__units=4)]
     selected8 = selected[SubscriptionType.objects.get(size__units=8)]
     selected2 = selected[SubscriptionType.objects.get(size__units=2)]
-    total_liters = selected4*4+selected8*8+selected2*2
+    total_liters = selected4 * 4 + selected8 * 8 + selected2 * 2
     if total_liters < 4:
         return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
     required8 = total_liters // 8
@@ -227,7 +233,7 @@ def subscription_select_content(request, cs_session, subscription_id):
     mand_products = SubscriptionSizeMandatoryProducts.objects.filter(
         subscription_size__in=[fst.size for fst in fut_subs_types.keys()]
     ).values_list("product_id", flat=True)
-    products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by("user_editable","code")
+    products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by("user_editable", "code")
     if "saveContent" in request.POST:
         custom_prods = parse_selected_custom_products(request.POST, products)
         error = new_content_valid(fut_subs_types, custom_prods, products)
@@ -270,7 +276,7 @@ def content_edit_result(request, subscription_id):
 
 @create_subscription_session
 def initial_select_content(request, cs_session):
-    products = Product.objects.all().order_by("user_editable","code")
+    products = Product.objects.all().order_by("user_editable", "code")
     if request.method == "POST":
         # create dict with subscription type -> selected amount
         custom_prods = parse_selected_custom_products(request.POST, products)

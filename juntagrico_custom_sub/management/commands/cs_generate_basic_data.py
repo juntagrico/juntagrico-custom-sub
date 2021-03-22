@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.core.management.base import BaseCommand
-
-from django import utils
 from juntagrico import models as jm
+
 from juntagrico_custom_sub import models as csm
-import pytz  # noqa --> not importing creates naive time objects
 
 
 class Command(BaseCommand):

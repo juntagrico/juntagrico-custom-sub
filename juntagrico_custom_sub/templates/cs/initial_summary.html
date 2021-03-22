@@ -1,6 +1,4 @@
-{% extends "no_menu_base.html" %}
-{% load i18n %}
-{% load config %}
+{% extends "no_menu_base.html" %}{% load i18n %}{% load config %}
 {% block all_page_title %}
     {% vocabulary "subscription" as v_subscription %}
     <div class="offset-md-3 col-md-9 juntagrico">
@@ -21,55 +19,57 @@
     {% config "enable_shares" as c_enable_shares %}
     <div class="offset-md-2 col-md-8">
         <h4>{% trans "Personalien" %}
-            {% if not main_member.pk %}<a href="{% url 'signup' %}" class="edit"><i class="fas fa-pen"></i></a>{% endif %}
+            {% if not main_member.pk %}
+                <a href="{% url 'signup' %}" class="edit"><i class="fas fa-pen"></i></a>{% endif %}
         </h4>
-        <p>{{ main_member.first_name }} {{ main_member.last_name }}
-            <br>{{ main_member.addr_street }}
-            <br>{{ main_member.addr_zipcode }} {{ main_member.addr_location }}
-            <br>{% trans 'E-Mail' %}: <b>{{ main_member.email }}</b>
-            <br>{% trans 'Telefon' %}: {{ main_member.phone }}
+        <p>{{ main_member.first_name }} {{ main_member.last_name }} <br>{{ main_member.addr_street }}
+            <br>{{ main_member.addr_zipcode }} {{ main_member.addr_location }} <br>{% trans 'E-Mail' %}:
+            <b>{{ main_member.email }}</b> <br>{% trans 'Telefon' %}: {{ main_member.phone }}
             <br>{% trans 'Mobil' %}: {{ main_member.mobile_phone|default:'-' }}
             <br>{% trans 'Geburtstag' %}: {{ main_member.birthday|default:'-' }}
         </p>
 
         <h4>{{ v_subscription }} <a href="{% url 'cs-subscription' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
         <p>
-        {% for type, amount in subscriptions.items %}
-            {%blocktrans trimmed with tn=type.name tp=type.price%}
-            <b>{{ amount }}</b>&times; {{ tn }} à {{ c_currency }} {{ tp }}/Jahr
-            {%endblocktrans%}
-            {% if not forloop.last %}<br>{% endif %}
-        {% endfor %}
-        {% if subscriptions|length == 0 %}
-            {%blocktrans%}Keine {{ v_subscription_pl }}{%endblocktrans%}
-        {% endif %}
+            {% for type, amount in subscriptions.items %}
+                {% blocktrans trimmed with tn=type.name tp=type.price %}
+                    <b>{{ amount }}</b>&times; {{ tn }} à {{ c_currency }} {{ tp }}/Jahr
+                {% endblocktrans %}
+                {% if not forloop.last %}<br>{% endif %}
+            {% endfor %}
+            {% if subscriptions|length == 0 %}
+                {% blocktrans %}Keine {{ v_subscription_pl }}{% endblocktrans %}
+            {% endif %}
         </p>
 
-        <h4>{% trans "Inhalt" %} <a href="{% url 'custom_sub_initial_select' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
+        <h4>{% trans "Inhalt" %} <a href="{% url 'custom_sub_initial_select' %}" class="edit"><i class="fas fa-pen"></i></a>
+        </h4>
         {% for product, amount in custom_prod.items %}
             <b>{{ amount }}</b>&times; {{ product|striptags }} <br>
         {% endfor %}
 
         {% if subscriptions|length > 0 %}
             <h4>{% trans "Depot" %} <a href="{% url 'cs-depot' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
-            <p>{{ depot.name }}
-                <br>{% trans 'Abholung jeweils am' %} {{ depot.weekday_name }}
+            <p>{{ depot.name }} <br>{% trans 'Abholung jeweils am' %} {{ depot.weekday_name }}
                 {% if depot.addr_street %}<br>{{ depot.addr_street }}{% endif %}
-                {% if depot.addr_zipcode or depot.addr_location %}<br>{{ depot.addr_zipcode }} {{ depot.addr_location }}{% endif %}
+                {% if depot.addr_zipcode or depot.addr_location %}<br>{{ depot.addr_zipcode }}
+                    {{ depot.addr_location }}{% endif %}
             </p>
 
-            <h4>{% trans "Gewünschtes Startdatum" %} <a href="{% url 'cs-start' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
+            <h4>{% trans "Gewünschtes Startdatum" %} <a href="{% url 'cs-start' %}" class="edit"><i
+                    class="fas fa-pen"></i></a></h4>
             <p>{{ start_date }}</p>
 
             <h4>{{ v_co_member_pl }}</h4>
             {% for co_member in co_members %}
                 <p>{{ co_member.first_name }} {{ co_member.last_name }}
-                    {% if not co_member.pk %}<a href="{% url 'cs-co-members' %}?edit={{forloop.counter}}" class="edit"><i class="fas fa-pen"></i></a>{% endif %}
-                    <a href="{% url 'cs-co-members' %}?remove={{forloop.counter}}" class="delete"><i class="fas fa-trash"></i></a>
-                    <br>{{ co_member.addr_street }}
-                    <br>{{ co_member.addr_zipcode }} {{ co_member.addr_location }}
-                    <br>{% trans 'E-Mail' %}: <b>{{ co_member.email }}</b>
-                    <br>{% trans 'Telefon' %}: {{ co_member.phone }}
+                    {% if not co_member.pk %}
+                        <a href="{% url 'cs-co-members' %}?edit={{ forloop.counter }}" class="edit"><i
+                                class="fas fa-pen"></i></a>{% endif %}
+                    <a href="{% url 'cs-co-members' %}?remove={{ forloop.counter }}" class="delete"><i
+                            class="fas fa-trash"></i></a> <br>{{ co_member.addr_street }}
+                    <br>{{ co_member.addr_zipcode }} {{ co_member.addr_location }} <br>{% trans 'E-Mail' %}:
+                    <b>{{ co_member.email }}</b> <br>{% trans 'Telefon' %}: {{ co_member.phone }}
                     <br>{% trans 'Mobil' %}: {{ co_member.mobile_phone|default:'-' }}
                     <br>{% trans 'Geburtstag' %}: {{ co_member.birthday|default:'-' }}
                 </p>
@@ -84,11 +84,14 @@
         {% endif %}
 
         {% if c_enable_shares %}
-            <h4>{% trans "Anteilscheine" %} <a href="{% url 'cs-shares' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
+            <h4>{% trans "Anteilscheine" %} <a href="{% url 'cs-shares' %}" class="edit"><i class="fas fa-pen"></i></a>
+            </h4>
             <p>
-                {{ main_member.first_name }} {{ main_member.last_name }}: <b>{{ main_member.new_shares|default:'Keine' }}</b>
+                {{ main_member.first_name }} {{ main_member.last_name }}:
+                <b>{{ main_member.new_shares|default:'Keine' }}</b>
                 {% for co_member in co_members %}
-                <br>{{ co_member.first_name }} {{ co_member.last_name }}: <b>{{ co_member.new_shares|default:'Keine' }}</b>
+                    <br>{{ co_member.first_name }} {{ co_member.last_name }}:
+                    <b>{{ co_member.new_shares|default:'Keine' }}</b>
                 {% endfor %}
             </p>
             <p>{% blocktrans %}Zu je einmalig {{ c_currency }} {{ c_share_price }}{% endblocktrans %}</p>

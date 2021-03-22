@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('juntagrico', '0018_auto_20191019_2031'),
         ('juntagrico_custom_sub', '0006_auto_20191113_2304'),

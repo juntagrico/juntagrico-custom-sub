@@ -1,29 +1,33 @@
 from django.contrib import admin
-
 from juntagrico.admins import BaseAdmin
-from juntagrico_custom_sub import models as jcsm
+
+from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery, CustomDeliveryProduct
+from juntagrico_custom_sub.entity.product import Product
+from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
+from juntagrico_custom_sub.entity.subscription_content_future_item import SubscriptionContentFutureItem
+from juntagrico_custom_sub.entity.subscription_content_item import SubscriptionContentItem
 
 
 class SubItemsInline(admin.TabularInline):
-    model = jcsm.SubscriptionContentItem
+    model = SubscriptionContentItem
 
 
 class FutureSubItemsInline(admin.TabularInline):
-    model = jcsm.SubscriptionContentFutureItem
+    model = SubscriptionContentFutureItem
 
 
 class MandatoryProductInline(admin.TabularInline):
-    model = jcsm.Product.mandatory_for_sizes.through
+    model = Product.mandatory_for_sizes.through
 
 
 class SubscriptionContentAdmin(admin.ModelAdmin):
     list_display = ('subscription_id', 'get_member', 'get_email', 'get_depot_name')
 
     search_fields = [
-         'subscription__primary_member__email',
-         'subscription__primary_member__first_name',
-         'subscription__primary_member__last_name',
-         'subscription__depot__name']
+        'subscription__primary_member__email',
+        'subscription__primary_member__first_name',
+        'subscription__primary_member__last_name',
+        'subscription__depot__name']
 
     def get_member(self, obj):
         mem = obj.subscription.primary_member
@@ -50,7 +54,7 @@ class SubscriptionContentAdmin(admin.ModelAdmin):
 
 
 class CustomDeliveryProductInline(admin.TabularInline):
-    model = jcsm.CustomDeliveryProduct
+    model = CustomDeliveryProduct
 
 
 class CustomDeliveryAdmin(admin.ModelAdmin):
@@ -63,6 +67,6 @@ class CustomDeliveryProductAdmin(BaseAdmin):
     list_display = ['name', 'code', 'units']
 
 
-admin.site.register(jcsm.Product, CustomDeliveryProductAdmin)
-admin.site.register(jcsm.SubscriptionContent, SubscriptionContentAdmin)
-admin.site.register(jcsm.CustomDelivery, CustomDeliveryAdmin)
+admin.site.register(Product, CustomDeliveryProductAdmin)
+admin.site.register(SubscriptionContent, SubscriptionContentAdmin)
+admin.site.register(CustomDelivery, CustomDeliveryAdmin)
