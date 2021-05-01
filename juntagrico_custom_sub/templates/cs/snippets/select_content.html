@@ -46,7 +46,7 @@
             {% for product in products %}
                 $('#addProduct{{ product.id }}').click(function () {
                     var oldVal = +$('#valueProduct{{ product.id }}').val();
-                    if (getTotalUsedUnits() + {{ product.units }} < = {{ future_subscription_size }}) {
+                    if (getTotalUsedUnits() + {{ product.units }} <= {{ future_subscription_size }}) {
                         $('#valueProduct{{ product.id }}').val(oldVal + 1);
                     }
                     calculateRemainingUnits();

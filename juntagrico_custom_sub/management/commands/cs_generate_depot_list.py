@@ -49,9 +49,10 @@ class Command(BaseCommand):
         for weekday, depot_list in grouped_depots.items():
             total = [0] * len(deliveryProducts)
             for depot in depot_list:
+                product_totals = depot.product_totals
                 for idx, prod in enumerate(deliveryProducts):
-                    total[idx] = total[idx] + depot.product_totals[prod]
-                    overallTotal[idx] = overallTotal[idx] + depot.product_totals[prod]
+                    total[idx] = total[idx] + product_totals[prod]
+                    overallTotal[idx] = overallTotal[idx] + product_totals[prod]
             totals[weekday] = total
 
         renderdict_depotlist = {
