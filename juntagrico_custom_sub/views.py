@@ -124,9 +124,8 @@ def initial_select_size(request, cs_session, **kwargs):
             selected = form.get_selected()
             cs_session.custom_prod = {}
             err_msg = quantity_error(selected)
-            if not err_msg or form.cleaned_data['no_subscription']:
+            if not err_msg or request.POST.get("subscription") == "-1":
                 cs_session.subscriptions = selected
-                #TODO how to go to correct page in case of no subscription
                 return redirect(cs_session.next_page())
             else:
                 form.add_error(None,err_msg)
