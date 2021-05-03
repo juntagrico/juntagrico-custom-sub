@@ -1,4 +1,7 @@
-{% extends "management_lists/man_list_base.html" %}{% load i18n %}{% load config %}
+{% extends "management_lists/man_list_base.html" %}
+{% load i18n %}
+{% load juntagrico.config %}
+{% load juntagrico.subscription %}
 {% block page_title %}
     <h3>
         {% trans "Inhalt Änderungsliste" %}
@@ -31,7 +34,7 @@
             <tr>
                 <td>
                     <a href="/admin/juntagrico/subscription/{{ subscription.id }}/change/">
-                        {{ subscription.overview }}
+                        {{ subscription }}
                     </a>
                 </td>
                 <td>

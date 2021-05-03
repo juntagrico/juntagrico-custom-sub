@@ -13,15 +13,10 @@ from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription
 from juntagrico.entity.subs import Subscription, SubscriptionPart
-from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionType
-from juntagrico.mailer import membernotification
-from juntagrico.util import management as ja_mgmt
 from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.management_list import get_changedate
 from juntagrico.util.management import new_signup, create_subscription_parts
 from juntagrico.util.views_admin import subscription_management_list
-from juntagrico.views import get_menu_dict
-from juntagrico.views import get_page_dict
 from juntagrico.views_create_subscription import CSSummaryView
 
 from juntagrico.forms import SubscriptionPartSelectForm, SubscriptionPartOrderForm
@@ -92,7 +87,7 @@ def new_next_page(self):
 sessions.CSSessionObject.next_page = new_next_page
 
 
-########################################################################################################################
+###############################################################################
 class CustomCSSummaryView(CSSummaryView):
     """
     Custom summary view for custom products.
@@ -128,16 +123,15 @@ def initial_select_size(request, cs_session, **kwargs):
                 cs_session.subscriptions = selected
                 return redirect(cs_session.next_page())
             else:
-                form.add_error(None,err_msg)
+                form.add_error(None, err_msg)
     else:
         form = SubscriptionPartSelectForm(cs_session.subscriptions)
 
-    render_dict = get_page_dict(request)
-    render_dict.update({
+    render_dict = {
         'form': form,
         'subscription_selected': sum(form.get_selected().values()) > 0,
         'hours_used': Config.assignment_unit() == 'HOURS',
-    })
+    }
     return render(request, 'cs/initial_select_size.html', render_dict)
 
 
@@ -157,23 +151,23 @@ def size_change(request, cs_session, subscription_id):
         form = SubscriptionPartOrderForm(subscription, request.POST)
         if form.is_valid():
             selected = form.get_selected()
-            err_msg = quantity_error(selected,subscription.active_and_future_parts)
+            err_msg = quantity_error(selected, subscription.active_and_future_parts)
             if not err_msg:
                 create_subscription_parts(subscription, selected)
                 return redirect("content_edit", subscription_id=subscription_id)
             else:
-                form.add_error(None,err_msg)  
+                form.add_error(None, err_msg)
     else:
         form = SubscriptionPartOrderForm()
-    renderdict = get_menu_dict(request)
-    renderdict.update({
+    renderdict = {
         'form': form,
         'subscription': subscription,
         'hours_used': Config.assignment_unit() == 'HOURS',
         'next_cancel_date': temporal.next_cancelation_date(),
         'parts_order_allowed': parts_order_allowed,
-    })
+    }
     return render(request, 'size_change.html', renderdict)
+
 
 @primary_member_of_subscription
 def cancel_part(request, part_id, subscription_id):
@@ -188,7 +182,7 @@ def cancel_part(request, part_id, subscription_id):
     return redirect("content_edit", subscription_id=subscription_id)
 
 
-def quantity_error(selected,active_parts=None):
+def quantity_error(selected, active_parts=None):
     """
     validates the selected quantities for Basimilch's usecase
     selected is a dictionnary with SubscriptionType objects as keys and amounts as values
@@ -366,8 +360,7 @@ def parse_selected_custom_products(post_data, products):
 
 @permission_required("juntagrico.is_operations_group")
 def list_content_changes(request, subscription_id=None):
-    render_dict = get_menu_dict(request)
-    render_dict.update(get_changedate(request))
+    render_dict = get_changedate(request)
     changedlist = []
     subscriptions_list = SubscriptionDao.all_active_subscritions()
     for subscription in subscriptions_list:

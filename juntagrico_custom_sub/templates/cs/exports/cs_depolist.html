@@ -1,4 +1,7 @@
-{% load common %}{% load config %}{% load i18n %}{% vocabulary "depot" as v_depot %}
+{% load juntagrico.common %}
+{% load juntagrico.config %}
+{% load i18n %}
+{% vocabulary "depot" as v_depot %}
 <html>
 
 <head>
@@ -116,7 +119,13 @@
         <th style="width: 70px;">Abo <br> Abgeholt</th>
         {% for sub in depot.active_subscriptions|dictsort:"primary_member.last_name" %}
             <tr>
-                <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.first_name.0 }}.{{ sub.primary_member.last_name }}</td>
+                <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">
+                {% if sub.nickname %}
+                    {{ sub.nickname }}
+                {% else %}
+                    {{ sub.primary_member.first_name.0 }}.{{ sub.primary_member.last_name }}
+                {% endif %}
+                </td>
                 {% for product in products %}
                     <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
                         {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
