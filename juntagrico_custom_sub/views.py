@@ -13,6 +13,7 @@ from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription
 from juntagrico.entity.subs import Subscription, SubscriptionPart
+from juntagrico.entity.subtypes import SubscriptionType
 from juntagrico.util import return_to_previous_location, sessions, temporal
 from juntagrico.util.management_list import get_changedate
 from juntagrico.util.management import new_signup, create_subscription_parts
