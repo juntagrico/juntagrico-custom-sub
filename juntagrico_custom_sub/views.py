@@ -203,7 +203,7 @@ def quantity_error(selected, active_parts=None):
 
     totalNew4 = present4 + selected4
     totalNew8 = present8 + selected8
-    totalNew2 = present4 + selected4
+    totalNew2 = present2 + selected2
 
     total_liters = totalNew4 * 4 + totalNew8 * 8 + totalNew2 * 2
     if total_liters < 4:
