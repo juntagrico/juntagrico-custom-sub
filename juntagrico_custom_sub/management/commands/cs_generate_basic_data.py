@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from django.core.management.base import BaseCommand
+from juntagrico import entity as jm
+from django.db import transaction
 
-from django import utils
-from juntagrico import models as jm
-from juntagrico_custom_sub import models as csm
-import pytz  # noqa --> not importing creates naive time objects
+from juntagrico_custom_sub import entity as csm
 
 
 class Command(BaseCommand):
 
     # entry point used by manage.py
+    @transaction.atomic
     def handle(self, *args, **options):
         subprod_fields = {"name": "Milch"}
-        subproduct = jm.SubscriptionProduct.objects.create(**subprod_fields)
+        subproduct = jm.subtypes.SubscriptionProduct.objects.create(**subprod_fields)
         subsize1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
@@ -41,9 +41,9 @@ class Command(BaseCommand):
             "product": subproduct,
             "description": "Enthält Produkte, die 2 Litern Milch entsprechen.",
         }
-        subsize1 = jm.SubscriptionSize.objects.create(**subsize1_fields)
-        subsize3 = jm.SubscriptionSize.objects.create(**subsize3_fields)
-        subsize4 = jm.SubscriptionSize.objects.create(**subsize4_fields)
+        subsize1 = jm.subtypes.SubscriptionSize.objects.create(**subsize1_fields)
+        subsize3 = jm.subtypes.SubscriptionSize.objects.create(**subsize3_fields)
+        subsize4 = jm.subtypes.SubscriptionSize.objects.create(**subsize4_fields)
         subtrype1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
@@ -74,9 +74,9 @@ class Command(BaseCommand):
             "price": 300,
             "description": "2-Liter-Abo.",
         }
-        jm.SubscriptionType.objects.create(**subtrype1_fields)
-        jm.SubscriptionType.objects.create(**subtrype3_fields)
-        jm.SubscriptionType.objects.create(**subtrype4_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtrype1_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtrype3_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtrype4_fields)
 
         # CS specific
         prod1_fields = {
@@ -84,30 +84,35 @@ class Command(BaseCommand):
             "units": 1,
             "unit_multiplier": 1,
             "unit_name": "Liter",
+            "code": "1",
         }
         prod2_fields = {
             "name": "Zusatzkäse",
             "units": 2,
             "unit_multiplier": 100,
             "unit_name": "Gramm",
+            "code": "2",
         }
         prod3_fields = {
             "name": "Quark",
             "units": 1,
             "unit_multiplier": 350,
             "unit_name": "Gramm",
+            "code": "3",
         }
         prod4_fields = {
             "name": "Fruchtjoghurt",
             "units": 0.5,
             "unit_multiplier": 1000,
             "unit_name": "Gramm",
+            "code": "4",
         }
         prod5_fields = {
             "name": "Naturejoghurt",
             "units": 0.5,
             "unit_multiplier": 1000,
             "unit_name": "Gramm",
+            "code": "5",
         }
         prod6_fields = {
             "name": "Wochenkäse klein",
@@ -115,6 +120,7 @@ class Command(BaseCommand):
             "unit_multiplier": 100,
             "unit_name": "Gramm",
             "user_editable": False,
+            "code": "6",
         }
         prod7_fields = {
             "name": "Wochenkäse gross",
@@ -122,14 +128,15 @@ class Command(BaseCommand):
             "unit_multiplier": 100,
             "unit_name": "Gramm",
             "user_editable": False,
+            "code": "7",
         }
-        csm.Product.objects.create(**prod1_fields)
-        csm.Product.objects.create(**prod2_fields)
-        csm.Product.objects.create(**prod3_fields)
-        csm.Product.objects.create(**prod4_fields)
-        csm.Product.objects.create(**prod5_fields)
-        wochenkase_klein = csm.Product.objects.create(**prod6_fields)
-        wochenkase_gross = csm.Product.objects.create(**prod7_fields)
+        csm.product.Product.objects.create(**prod1_fields)
+        csm.product.Product.objects.create(**prod2_fields)
+        csm.product.Product.objects.create(**prod3_fields)
+        csm.product.Product.objects.create(**prod4_fields)
+        csm.product.Product.objects.create(**prod5_fields)
+        wochenkase_klein = csm.product.Product.objects.create(**prod6_fields)
+        wochenkase_gross = csm.product.Product.objects.create(**prod7_fields)
 
         mandatory1_fields = {
             "subscription_size": subsize1,
@@ -141,31 +148,5 @@ class Command(BaseCommand):
             "product": wochenkase_gross,
             "amount": 1,
         }
-        csm.SubscriptionSizeMandatoryProducts.objects.create(**mandatory1_fields)
-        csm.SubscriptionSizeMandatoryProducts.objects.create(**mandatory3_fields)
-
-        # add extra subscriptions (Zusatzabos)
-        extra_sub_cat1 = jm.ExtraSubscriptionCategory.objects.create(
-            name="Spezialkäse",
-            description="Spezialkäse für Waghalsige Käseliebhaber",
-            sort_order=1,
-            visible=True,
-        )
-        extra_sub_type1 = jm.ExtraSubscriptionType.objects.create(
-            name="Spezialkäse Einheitsgrösse",
-            size="Einheitsgrösse",
-            description="Einmal pro Monat Überraschunskäse",
-            sort_order=1,
-            category_id=extra_sub_cat1.id,
-            visible=True,
-        )
-        jm.ExtraSubBillingPeriod.objects.create(
-            start_day=1,
-            start_month=1,
-            end_day=31,
-            end_month=12,
-            type_id=extra_sub_type1.id,
-            cancel_day=30,
-            cancel_month=9,
-            price=120,
-        )
+        csm.subscription_size_mandatory_products.SubscriptionSizeMandatoryProducts.objects.create(**mandatory1_fields)
+        csm.subscription_size_mandatory_products.SubscriptionSizeMandatoryProducts.objects.create(**mandatory3_fields)

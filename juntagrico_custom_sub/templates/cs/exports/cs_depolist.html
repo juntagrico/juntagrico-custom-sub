@@ -1,5 +1,5 @@
-{% load common %}
-{% load config %}
+{% load juntagrico.common %}
+{% load juntagrico.config %}
 {% load i18n %}
 {% vocabulary "depot" as v_depot %}
 <html>
@@ -9,20 +9,24 @@
     <style>
         @page {
             size: a4 landscape;
-            @frame header_frame {           /* Static Frame */
-                -pdf-frame-content: header_content;
-                left: 30pt; width: 782pt; top: 20pt; height: 20pt;
-            }
-            @frame content_frame {
-                left: 30pt;
-                width: 782pt;
-                top: 50pt;
-                height: 495pt;
-            }
-            @frame footer_frame {           /* Another static Frame */
-                -pdf-frame-content: footer_content;
-                left: 30pt; width: 782pt; top: 545pt; height: 20pt;
-            }
+            @frame header_frame { /* Static Frame */
+            -pdf-frame-content: header_content;
+            left: 30pt;
+            width: 782pt;
+            top: 20pt;
+            height: 20pt;
+        }
+        @frame content_frame {
+        left: 30pt;
+        width: 782pt;
+        top: 50pt;
+        height: 495pt;
+        }
+        @frame footer_frame {
+            /* Another static Frame */
+        -pdf-frame-content:footer_content;
+        left: 30pt; width: 782pt; top: 545pt; height: 20pt;
+        }
         }
 
         body {
@@ -79,6 +83,7 @@
         h2 {
             margin-bottom: 0;
         }
+
         h3 {
             -pdf-keep-with-next: true;
         }
@@ -86,6 +91,7 @@
         #footer_content {
             text-align: right;
         }
+
         #header_content {
             text-align: right;
         }
@@ -93,39 +99,45 @@
 </head>
 
 <body>
-    <div id="header_content">
-        Erstellt am: {% now "d.m.Y H:i" %}
-    </div>
-    {% for depot in depots %}
+<div id="header_content">
+    Erstellt am: {% now "d.m.Y H:i" %}
+</div>
+{% for depot in depots %}
     <h1>Basimilch Aboliste</h1>
     <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
     <div class="contact">
         <div class="no-padding"><b>{% blocktrans %}{{ v_depot }}-Betreuung{% endblocktrans %}</b></div>
-        <div class="no-padding">{{ depot.contact.first_name }} {{depot.contact.last_name}}</div>
+        <div class="no-padding">{{ depot.contact.first_name }} {{ depot.contact.last_name }}</div>
         <div class="no-padding">{{ depot.contact.email }}</div>
         <div class="no-padding">{{ depot.contact.phone }}</div>
     </div>
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
         {% for product in products %}
-        <th style="word-wrap: break-word;">{{product.name|safe}}</th>
+            <th style="word-wrap: break-word;">{{ product.name|safe }}</th>
         {% endfor %}
         <th style="width: 70px;">Abo <br> Abgeholt</th>
         {% for sub in depot.active_subscriptions|dictsort:"primary_member.last_name" %}
-        <tr>
-            <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ sub.primary_member.first_name.0}}.{{ sub.primary_member.last_name}}</td>
-            {% for product in products %}
-            <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
-                {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
-                    {{sub.content.amounts_for_products|get_item:product}} </span> {% endif %}</td>
-            {% endfor %}
-            <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
-        </tr>
+            <tr>
+                <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">
+                {% if sub.nickname %}
+                    {{ sub.nickname }}
+                {% else %}
+                    {{ sub.primary_member.first_name.0 }}.{{ sub.primary_member.last_name }}
+                {% endif %}
+                </td>
+                {% for product in products %}
+                    <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
+                        {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
+                    {{ sub.content.amounts_for_products|get_item:product }} </span> {% endif %}</td>
+                {% endfor %}
+                <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
+            </tr>
         {% endfor %}
         <tr>
             <td class="total">Total</td>
             {% for product in products %}
-            <td class="total">{{depot.product_totals|get_item:product}}</td>
+                <td class="total">{{ depot.product_totals|get_item:product }}</td>
             {% endfor %}
         </tr>
     </table>
@@ -134,10 +146,11 @@
     {% if not forloop.last %}
         <div class="page-break"></div>
     {% endif %}
-    {% endfor %}
-    <div id="footer_content">
-        <pdf:pagenumber>/<pdf:pagecount>
-    </div>
+{% endfor %}
+<div id="footer_content">
+    <pdf:pagenumber>/
+        <pdf:pagecount>
+</div>
 </body>
 
 </html>

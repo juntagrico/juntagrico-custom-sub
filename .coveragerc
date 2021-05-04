@@ -1,0 +1,5 @@
+[run]
+include =
+    juntagrico_custom_sub/*
+omit =
+    juntagrico_custom_sub/migrations/*

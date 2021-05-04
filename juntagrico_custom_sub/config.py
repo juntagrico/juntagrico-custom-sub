@@ -1,6 +1,5 @@
-from django.utils.translation import gettext as _
-
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 
 class Config:
@@ -13,5 +12,5 @@ class Config:
             return settings.CS_VOCABULARY[key]
         return {
             'base_unit': _('Liter'),
-            'base_unit_pl':_('Liter')
+            'base_unit_pl': _('Liter')
         }[key]

@@ -13,18 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
 from django.urls import path
 
 from juntagrico_custom_sub import views
 
 urlpatterns = [
-    url('^cs/subscription/change/content/(?P<subscription_id>.*?)/', views.subscription_select_content, name='content_edit'),  # noqa: E501
-    path('cs/subscription/change/result/<int:subscription_id>', views.content_edit_result, name='content_edit_result'),
-    url('^cs/contentchangelist/', views.list_content_changes),
-    url('^cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
-    url('^cs/content/change/(?P<subscription_id>.*?)/', views.activate_future_content),
+    path('cs/subscription/change/content/<subscription_id>/', views.subscription_select_content,
+         name='content_edit'),  # noqa: E501
+    path('cs/subscription/change/result/<int:subscription_id>/', views.content_edit_result, name='content_edit_result'),
+    path('cs/contentchangelist/', views.list_content_changes),
+    path('cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
+    path('cs/content/change/<subscription_id>/', views.activate_future_content),
+    # urls overriden from core to make the management of custom composition of subscriptions possible
     path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
     path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
     path('my/create/subscription/', views.initial_select_size, name='cs-subscription'),
+    path('my/subpart/cancel/<int:part_id>/<int:subscription_id>/', views.cancel_part,
+         name='part-cancel'),
 ]

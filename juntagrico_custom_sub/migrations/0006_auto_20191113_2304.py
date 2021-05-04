@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('juntagrico_custom_sub', '0005_customdelivery_delivery_comment'),
     ]

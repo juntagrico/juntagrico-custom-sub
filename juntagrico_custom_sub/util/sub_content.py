@@ -1,4 +1,4 @@
-from juntagrico_custom_sub.models import SubscriptionSizeMandatoryProducts
+from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
 
 
 def new_content_valid(future_types, custom_prods, products):
@@ -6,9 +6,9 @@ def new_content_valid(future_types, custom_prods, products):
     total_units_required = sum([ft.size.units * amount for ft, amount in future_types.items()])
     for product in products:
         minimalAmountForProduct = 0
-        for ft in future_types:
+        for sub_type in future_types:
             for mandatoryProduct in SubscriptionSizeMandatoryProducts.objects.filter(
-                product=product, subscription_size=ft.size
+                    product=product, subscription_size=sub_type.size
             ):
                 minimalAmountForProduct += mandatoryProduct.amount
         productAmount = 0 if product not in custom_prods else custom_prods[product]
@@ -26,13 +26,13 @@ def new_content_valid(future_types, custom_prods, products):
 
 def calculate_future_size(subscription):
     result = 0
-    for type in subscription.future_types.all():
-        result += type.size.units
+    for part in subscription.future_parts:
+        result += part.type.size.units
     return result
 
 
 def calculate_current_size(subscription):
     result = 0
-    for type in subscription.types.all():
-        result += type.size.units
+    for part in subscription.active_parts:
+        result += part.type.size.units
     return result
