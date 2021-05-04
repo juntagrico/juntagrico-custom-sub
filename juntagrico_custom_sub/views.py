@@ -241,7 +241,7 @@ def subscription_select_content(request, cs_session, subscription_id):
             if cs_session.subscriptions:  # the user may get to this point without changing the subscription
                 pass
                 # TODO how does this need to be replaced
-                #replace_subscription_types(subscription, cs_session.subscriptions)
+                # replace_subscription_types(subscription, cs_session.subscriptions)
             # if there were previous future items in the db, delete them
             SubscriptionContentFutureItem.objects.filter(subscription_content=subContent).delete()
             add_products_to_subscription(subscription_id, custom_prods, SubscriptionContentFutureItem)
