@@ -41,5 +41,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    install_requires=get_requirements(os.path.join(ROOT_DIR, 'requirements-local.txt')),
+    install_requires=get_requirements(os.path.join(ROOT_DIR, 'requirements.txt')),
 )
