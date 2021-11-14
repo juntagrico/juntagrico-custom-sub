@@ -1,2 +1,2 @@
 
-juntagrico==1.4.0
+juntagrico==1.4.3
