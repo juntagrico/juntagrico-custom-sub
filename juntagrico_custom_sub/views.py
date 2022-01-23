@@ -97,10 +97,9 @@ class CustomCSSummaryView(CSSummaryView):
 
     template_name = "cs/initial_summary.html"
 
-    @staticmethod
-    def post(request, cs_session):
+    def post(self, request, *args, **kwargs):
         # handle new signup
-        registration_session = cs_session.pop()
+        registration_session = self.cs_session.pop()
         member = new_signup(registration_session)
         # associate custom products with subscription
         if member.subscription_future is not None:
