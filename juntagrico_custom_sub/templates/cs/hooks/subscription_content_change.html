@@ -19,7 +19,7 @@
         {% endfor %}
     </div>
     <div class="col-md-2">
-        <a href="/cs/subscription/change/content/{{ subscription.id }}/" class="btn btn-success">
+        <a href="{% url 'content_edit' subscription.id %}" class="btn btn-success">
             {% blocktrans %}Inhalt ändern{% endblocktrans %}
         </a>
     </div>

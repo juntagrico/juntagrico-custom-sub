@@ -136,8 +136,7 @@ def initial_select_size(request, cs_session, **kwargs):
 
 
 @primary_member_of_subscription
-@create_subscription_session
-def size_change(request, cs_session, subscription_id):
+def size_change(request, subscription_id):
     """
     Overriden from core
     change the size of a subscription
@@ -214,20 +213,14 @@ def quantity_error(selected, active_parts=None):
             Es ist zum Beispiel nicht möglich, 8 Liter auf zwei Vierliter-Abos aufzuteilen."
     return ""
 
-
 @primary_member_of_subscription
-@create_subscription_session
-def subscription_select_content(request, cs_session, subscription_id):
+def subscription_select_content(request, subscription_id):
     render_dict = dict()
     subscription = get_object_or_404(Subscription, id=subscription_id)
     subContent = SubscriptionContent.objects.get(subscription=subscription)
 
-    if cs_session.subscriptions:  # subscription size has been changed during previous step
-        fut_subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
-        future_subscription_size = cs_session.subscription_size()
-    else:
-        fut_subs_types = count_subs_sizes(subscription.future_parts)
-        future_subscription_size = int(calculate_future_size(subscription))
+    fut_subs_types = count_subs_sizes(subscription.future_parts)
+    future_subscription_size = int(calculate_future_size(subscription))
 
     # products to be considered are only the ones that are editable or mandatory for the chosen sizes
     mand_products = SubscriptionSizeMandatoryProducts.objects.filter(
@@ -238,17 +231,11 @@ def subscription_select_content(request, cs_session, subscription_id):
         custom_prods = parse_selected_custom_products(request.POST, products)
         error = new_content_valid(fut_subs_types, custom_prods, products)
         if not error:
-            if cs_session.subscriptions:  # the user may get to this point without changing the subscription
-                pass
-                # TODO how does this need to be replaced
-                # replace_subscription_types(subscription, cs_session.subscriptions)
             # if there were previous future items in the db, delete them
             SubscriptionContentFutureItem.objects.filter(subscription_content=subContent).delete()
             add_products_to_subscription(subscription_id, custom_prods, SubscriptionContentFutureItem)
-            cs_session.clear()
             return redirect("content_edit_result", subscription_id=subscription_id)
         else:
-            cs_session.error = error
             return redirect("content_edit", subscription_id=subscription_id)
 
     for prod in products:
@@ -261,12 +248,6 @@ def subscription_select_content(request, cs_session, subscription_id):
     render_dict["subscription"] = subscription
     render_dict["products"] = products
     render_dict["future_subscription_size"] = future_subscription_size
-
-    if cs_session.error:
-        template = get_template("cs/snippets/error_message.html")
-        render_result = template.render({"error": cs_session.error})
-        render_dict["messages"] = [render_result]
-        cs_session.error = None
 
     return render(request, "cs/subscription_select_content.html", render_dict)
 
