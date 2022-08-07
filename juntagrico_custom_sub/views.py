@@ -99,6 +99,7 @@ class CustomCSSummaryView(CSSummaryView):
 
     def post(self, request, *args, **kwargs):
         # handle new signup
+        self.cs_session.main_member.comment = request.POST.get("comment")
         registration_session = self.cs_session.pop()
         member = new_signup(registration_session)
         # associate custom products with subscription
