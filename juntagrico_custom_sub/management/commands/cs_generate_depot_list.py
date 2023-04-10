@@ -26,7 +26,7 @@ class Command(BaseCommand):
             print(
                 'not the specified day for depot list generation, use --force to override')
             return
-        depots = CsDepot.objects.all().order_by('sort_order')
+        depots = CsDepot.objects.all().filter(depot_list=True).order_by('sort_order')
         products = Product.objects.all().order_by('code')
         latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
 
