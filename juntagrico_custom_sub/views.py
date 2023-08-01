@@ -220,7 +220,7 @@ def subscription_select_content(request, subscription_id):
     subscription = get_object_or_404(Subscription, id=subscription_id)
     subContent = SubscriptionContent.objects.get(subscription=subscription)
 
-    fut_subs_types = count_subs_sizes(subscription.future_parts)
+    fut_subs_types = count_subs_sizes(subscription.active_and_future_parts)
     future_subscription_size = int(calculate_future_size(subscription))
 
     # products to be considered are only the ones that are editable or mandatory for the chosen sizes
