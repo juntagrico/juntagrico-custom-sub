@@ -26,7 +26,7 @@ def new_content_valid(future_types, custom_prods, products):
 
 def calculate_future_size(subscription):
     result = 0
-    for part in subscription.future_parts:
+    for part in subscription.active_and_future_parts:
         result += part.type.size.units
     return result
 
