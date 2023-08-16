@@ -3,7 +3,6 @@ import logging
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -213,6 +212,7 @@ def quantity_error(selected, active_parts=None):
         return "Du musst immer die grösstmögliche Abogrösse nehmen. \
             Es ist zum Beispiel nicht möglich, 8 Liter auf zwei Vierliter-Abos aufzuteilen."
     return ""
+
 
 @primary_member_of_subscription
 def subscription_select_content(request, subscription_id):
