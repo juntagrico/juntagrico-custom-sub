@@ -22,24 +22,26 @@ setup(
     version=juntagrico_custom_sub.version,
     packages=find_packages(),
     include_package_data=True,
-    license='LPGLv3',  # example license
-    description='juntagrico-custom-sub',
+    license='LPGLv3',
+    description='Custom composition of subscriptions in juntagrico',
     long_description=README,
-    url='http://juntagrico.org',
+    long_description_content_type='text/markdown',
+    url='https://juntagrico.org',
     author='juntagrico',
     author_email='info@juntagrico.org',
     classifiers=[
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 3.0',  # replace "X.Y" as appropriate
+        'Framework :: Django :: 4.0',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: LPGLv3',  # example license
+        'Intended Audience :: Other Audience',
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        # Replace these appropriately if you are stuck on Python 2.
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Topic :: Internet :: WWW/HTTP :: Site Management',
     ],
     install_requires=get_requirements(os.path.join(ROOT_DIR, 'requirements.txt')),
 )
