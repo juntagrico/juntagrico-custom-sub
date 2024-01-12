@@ -14,3 +14,30 @@ A subscription has a total amount of available units and each product can be ass
 
 The extension also creates depot lists and packing lists that describe which products should be delivered to a depot and by which user they should be collected.
 
+## Installation
+
+
+Install juntagrico-badge via `pip`
+
+    $ pip install juntagrico-custom-sub
+
+or add it in your projects `requirements.txt`
+
+In `settings.py` add `'juntagrico_custom_sub',`.
+
+```python
+INSTALLED_APPS = [
+    ...
+    'juntagrico',
+    'juntagrico_custom_sub',
+]
+```
+
+In your `urls.py` you also need to extend the pattern:
+
+```python
+urlpatterns = [
+    ...
+    path('', include('juntagrico_custom_sub.urls')),
+]
+```
