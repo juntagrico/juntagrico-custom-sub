@@ -15,9 +15,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
+    "crispy_forms",
+    "adminsortable2",
+    "djrichtextfield",
+    "polymorphic",
     "juntagrico",
     "juntagrico_custom_sub",
-    "crispy_forms",
 ]
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "yourdatabasename.db"}}
@@ -84,6 +87,7 @@ TEMPLATES = [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
                 "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.request",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
@@ -104,5 +108,4 @@ LOGIN_REDIRECT_URL = "/my/home"
 
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
-
-GOOGLE_API_KEY = "AIzaSyCcii4Z71qyky54kEQtRhFbB_z-2zbSU28"
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

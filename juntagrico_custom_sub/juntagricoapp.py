@@ -1,14 +1,8 @@
-from django.apps import AppConfig
 from juntagrico.entity.subtypes import SubscriptionSize
 from juntagrico.util import addons
 
 import juntagrico_custom_sub
 from juntagrico_custom_sub.admin import MandatoryProductInline
-
-
-class JuntagricoCustomSub(AppConfig):
-    name = 'juntagrico_custom_sub'
-    verbose_name = "Juntagrico custom sub"
 
 
 addons.config.register_model_inline(SubscriptionSize, MandatoryProductInline)
