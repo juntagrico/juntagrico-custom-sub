@@ -21,7 +21,7 @@ urlpatterns = [
     path('cs/subscription/change/content/<subscription_id>/', views.subscription_select_content,
          name='content_edit'),  # noqa: E501
     path('cs/subscription/change/result/<int:subscription_id>/', views.content_edit_result, name='content_edit_result'),
-    path('cs/contentchangelist/', views.list_content_changes),
+    path('cs/contentchangelist/', views.list_content_changes, name='content_change_list'),
     path('cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
     path('cs/content/change/<subscription_id>/', views.activate_future_content),
     # urls overriden from core to make the management of custom composition of subscriptions possible

@@ -15,19 +15,30 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
+    "fontawesomefree",
+    "impersonate",
+    "import_export",
     "crispy_forms",
     "adminsortable2",
     "djrichtextfield",
     "polymorphic",
-    "juntagrico",
     "juntagrico_custom_sub",
+    "juntagrico",
 ]
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "yourdatabasename.db"}}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME":  "yourdatabasename.db",
+    }
+}
 
 ROOT_URLCONF = "testurls"
 
-AUTHENTICATION_BACKENDS = ("juntagrico.util.auth.AuthenticateWithEmail", "django.contrib.auth.backends.ModelBackend")
+AUTHENTICATION_BACKENDS = (
+    "juntagrico.util.auth.AuthenticateWithEmail",
+    "django.contrib.auth.backends.ModelBackend"
+)
 
 
 MIDDLEWARE = (
@@ -36,6 +47,7 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "impersonate.middleware.ImpersonateMiddleware",
 )
 
 EMAIL_HOST = os.environ.get("JUNTAGRICO_EMAIL_HOST")
@@ -87,10 +99,10 @@ TEMPLATES = [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
                 "django.contrib.auth.context_processors.auth",
-                "django.template.context_processors.request",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
+                "django.template.context_processors.request",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
@@ -104,8 +116,12 @@ TEMPLATES = [
     }
 ]
 
-LOGIN_REDIRECT_URL = "/my/home"
+LOGIN_REDIRECT_URL = "/"
 
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+IMPERSONATE = {
+    "REDIRECT_URL": "/my/profile",
+}
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"
