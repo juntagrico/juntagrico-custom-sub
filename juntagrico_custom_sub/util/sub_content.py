@@ -1,7 +1,9 @@
+from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
 
 
-def new_content_valid(future_types, custom_prods, products):
+def new_content_valid(future_types, custom_prods, products=None):
+    products = products or Product.objects.all()
     totalUnits = 0
     total_units_required = sum([ft.size.units * amount for ft, amount in future_types.items()])
     for product in products:

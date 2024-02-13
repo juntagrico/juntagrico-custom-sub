@@ -28,7 +28,7 @@ jobs:
         pip install --root-user-action=ignore --upgrade -r requirements.txt
     - name: ruff
       run: |
-        ruff check juntagrico_webdav
+        ruff check juntagrico_custom_sub
         ruff check test
     - name: install CodeClimate reporter
       if: ${{ env.CC_TEST_REPORTER_ID != null && github.event_name == 'push'}}

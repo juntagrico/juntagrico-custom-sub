@@ -1,0 +1,12 @@
+{% extends "createsubscription/summary.html" %}
+{% load i18n %}
+{% load juntagrico.config %}
+{% load crispy_forms_tags %}
+{% block subscription %}
+    {{ block.super }}
+    
+    <h4>{% trans "Inhalt" %} <a href="{% url 'custom_sub_initial_select' %}" class="edit"><i class="fas fa-pen"></i></a></h4>
+    {% for product, amount in custom_prod.items %}
+        <b>{{ amount }}</b>&times; {{ product|striptags }}<br>
+    {% endfor %}
+{% endblock %}
