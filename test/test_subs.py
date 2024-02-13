@@ -1,3 +1,4 @@
+from django.test import override_settings
 from django.urls import reverse
 
 from test import JuntagricoCustomSubTestCase
@@ -17,9 +18,14 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
             user_editable=False
         )
 
+    @override_settings(ROOT_URLCONF='testurls_downgraded')
+    def testOldSub(self):
+        self.assertGet(reverse('subscription-landing'))
+        self.assertGet(reverse('subscription-single', args=[self.subscription1.pk]))
+
     def testSub(self):
-        self.assertGet(reverse('sub-detail'))
-        self.assertGet(reverse('sub-detail-id', args=[self.subscription1.pk]))
+        self.assertGet(reverse('subscription-landing'), code=302)
+        self.assertGet(reverse('subscription-single', args=[self.subscription1.pk]))
 
     def testContentChange(self):
         self.assertGet(reverse('content_edit', args=[self.subscription1.pk]))

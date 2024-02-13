@@ -23,13 +23,13 @@ Install juntagrico-badge via `pip`
 
 or add it in your projects `requirements.txt`
 
-In `settings.py` add `'juntagrico_custom_sub',`.
+In `settings.py` add `'juntagrico_custom_sub',`, *above* `'juntagrico'`.
 
 ```python
 INSTALLED_APPS = [
     ...
-    'juntagrico',
     'juntagrico_custom_sub',
+    'juntagrico',
 ]
 ```
 

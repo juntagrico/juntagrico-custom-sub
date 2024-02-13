@@ -1,0 +1,33 @@
+{% load i18n %}
+<div class="row mb-5 custom-sub">
+    <div class="col-md-3">
+        {% trans "Inhalt" %}
+    </div>
+    <div class="col-md-9">
+        {% if subscription.content.content_changed %}
+            <strong>{% trans "Aktuell" %}</strong>
+        {% endif %}
+        <ul>
+        {% for content in subscription.content.display_content %}
+            <li>{{ content }}</li>
+        {% endfor %}
+        </ul>
+        {% if subscription.content.content_changed %}
+            <strong>{% trans "Zukünftig" %}</strong>
+            <ul>
+            {% for content in subscription.content.display_future_content %}
+                <li>{{ content }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% block edit_info %}
+            <p>
+                {% trans "Deine Bedürfnisse haben sich geändert und du möchtest die Zusammenstellung deines Abos ändern?" %}<br>
+                {% trans "Du kannst diese jederzeit ändern - die Änderung werden drei mal jahrlich jeweils Anfang Jahr, ende April und mitte August aktiv." %}
+            </p>
+        {% endblock %}
+        <a href="{% url 'content_edit' subscription.id %}" class="btn btn-success">
+            {% blocktrans %}Inhalt ändern{% endblocktrans %}
+        </a>
+    </div>
+</div>
