@@ -22,8 +22,6 @@ def size_change(request, subscription_id):
         form = SubscriptionPartOrderForm(subscription, request.POST)
         if form.is_valid():
             create_subscription_parts(subscription, form.get_selected(), True)
-            # TODO: Check if useful. Bug: After size change, content selector assumes too large size.
-            #  Also apply to new subscription overview?
             return redirect("content_edit", subscription_id=subscription_id)
     else:
         form = SubscriptionPartOrderForm()

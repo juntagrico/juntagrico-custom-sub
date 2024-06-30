@@ -3,13 +3,17 @@ import logging
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
+from juntagrico import views_subscription
+from juntagrico.views import subscription as subscription_view
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.mailer import adminnotification
-from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription
+from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription, \
+    primary_member_of_subscription_of_part
 from juntagrico.entity.subs import Subscription, SubscriptionPart
 from juntagrico.util import return_to_previous_location, sessions
 from juntagrico.util.management_list import get_changedate
@@ -118,6 +122,28 @@ def cancel_part(request, part_id, subscription_id):
     part.cancel()
     adminnotification.subpart_canceled(part)
     return redirect("content_edit", subscription_id=subscription_id)
+
+
+@primary_member_of_subscription_of_part
+def part_change(request, part):
+    """
+    Overriden from core to redirect to the content change page
+    """
+    result = views_subscription.part_change(request, part_id=part.id)
+    if isinstance(result, HttpResponseRedirect):
+        return redirect("content_edit", subscription_id=part.subscription.id)
+    return result
+
+
+@primary_member_of_subscription
+def part_order(request, subscription_id, extra=False):
+    """
+    Overriden from core to redirect to the content change page
+    """
+    result = subscription_view.part_order(request, subscription_id=subscription_id, extra=extra)
+    if isinstance(result, HttpResponseRedirect):
+        return redirect("content_edit", subscription_id=subscription_id)
+    return result
 
 
 @primary_member_of_subscription
