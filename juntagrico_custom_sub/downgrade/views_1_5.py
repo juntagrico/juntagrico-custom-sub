@@ -18,8 +18,7 @@ def size_change(request, subscription_id):
     change the size of a subscription
     """
     subscription = get_object_or_404(Subscription, id=subscription_id)
-    # TODO: evaluated if this added month check should stay. If yes add to new subscription overview as well
-    if request.method == 'POST' and int(timezone.now().strftime("%m")) <= Config.business_year_cancelation_month():
+    if request.method == 'POST':
         form = SubscriptionPartOrderForm(subscription, request.POST)
         if form.is_valid():
             create_subscription_parts(subscription, form.get_selected(), True)
