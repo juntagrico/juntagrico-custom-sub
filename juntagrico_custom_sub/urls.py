@@ -21,13 +21,15 @@ urlpatterns = [
     path('cs/subscription/change/content/<subscription_id>/', views.subscription_select_content,
          name='content_edit'),  # noqa: E501
     path('cs/subscription/change/result/<int:subscription_id>/', views.content_edit_result, name='content_edit_result'),
-    path('cs/contentchangelist/', views.list_content_changes),
+    path('cs/contentchangelist/', views.list_content_changes, name='content_change_list'),
     path('cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
     path('cs/content/change/<subscription_id>/', views.activate_future_content),
     # urls overriden from core to make the management of custom composition of subscriptions possible
-    path('my/subscription/change/size/<int:subscription_id>/', views.size_change, name='size-change'),
     path('my/create/subscription/summary/', views.CustomCSSummaryView.as_view(), name='cs-summary'),
-    path('my/create/subscription/', views.initial_select_size, name='cs-subscription'),
     path('my/subpart/cancel/<int:part_id>/<int:subscription_id>/', views.cancel_part,
          name='part-cancel'),
+    path('my/subscription/part/<int:part_id>/change', views.part_change, name='part-change'),
+    path('my/subscription/<int:subscription_id>/order/', views.part_order, name='part-order'),
+    path('my/subscription/<int:subscription_id>/order/extra/', views.part_order, {'extra': True},
+         name='extra-order'),
 ]

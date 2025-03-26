@@ -1,5 +1,7 @@
 from django.contrib import admin
 from juntagrico.admins import BaseAdmin
+from juntagrico.entity.subtypes import SubscriptionSize
+from juntagrico.util import addons
 
 from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery, CustomDeliveryProduct
 from juntagrico_custom_sub.entity.product import Product
@@ -71,3 +73,6 @@ class CustomDeliveryProductAdmin(BaseAdmin):
 admin.site.register(Product, CustomDeliveryProductAdmin)
 admin.site.register(SubscriptionContent, SubscriptionContentAdmin)
 admin.site.register(CustomDelivery, CustomDeliveryAdmin)
+
+# extend the inline of SubscriptionSize
+addons.config.register_model_inline(SubscriptionSize, MandatoryProductInline)

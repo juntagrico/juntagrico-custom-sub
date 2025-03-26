@@ -1,25 +1,25 @@
 import logging
 
 from django.contrib.auth.decorators import permission_required
+from django.db import transaction
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.forms import ValidationError
 
+from juntagrico import views_subscription
+from juntagrico.views import subscription as subscription_view
 from juntagrico.config import Config
 from juntagrico.dao.subscriptiondao import SubscriptionDao
-from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription
+from juntagrico.mailer import adminnotification
+from juntagrico.view_decorators import create_subscription_session, primary_member_of_subscription, \
+    primary_member_of_subscription_of_part
 from juntagrico.entity.subs import Subscription, SubscriptionPart
-from juntagrico.entity.subtypes import SubscriptionType
-from juntagrico.util import return_to_previous_location, sessions, temporal
+from juntagrico.util import return_to_previous_location, sessions
 from juntagrico.util.management_list import get_changedate
-from juntagrico.util.management import new_signup, create_subscription_parts
+from juntagrico.util.management import new_signup
 from juntagrico.util.views_admin import subscription_management_list
 from juntagrico.views_create_subscription import CSSummaryView
-
-from juntagrico.forms import SubscriptionPartSelectForm, SubscriptionPartOrderForm
 
 from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
@@ -55,7 +55,8 @@ sessions.CSSessionObject.__init__ = new_init
 sessions.CSSessionObject.to_dict = new_to_dict
 
 
-def simple_get_size_name(types=[]):
+def simple_get_size_name(types=None):
+    types = types or []
     size_dict = []
     for type in types.all():
         size_dict.append(type.size.name + " " + type.size.product.name)
@@ -71,7 +72,9 @@ def new_next_page(self):
     has_subs = self.subscription_size() > 0
     if not self.subscriptions:
         return "cs-subscription"
-    elif has_subs and not self.custom_prod:
+    elif has_subs and not self.custom_prod or new_content_valid(
+            {subs: amount for subs, amount in self.subscriptions.items() if amount > 0}, self.custom_prod):
+        self.custom_prod = {}
         return "custom_sub_initial_select"
     elif has_subs and not self.depot:
         return "cs-depot"
@@ -94,11 +97,10 @@ class CustomCSSummaryView(CSSummaryView):
     Overwrites post method to make sure custom products are added to the subscription
     """
 
-    template_name = "cs/initial_summary.html"
-
-    def post(self, request, *args, **kwargs):
+    @transaction.atomic
+    def form_valid(self, form):
+        self.cs_session.main_member.comment = form.cleaned_data["comment"]
         # handle new signup
-        self.cs_session.main_member.comment = request.POST.get("comment")
         registration_session = self.cs_session.pop()
         member = new_signup(registration_session)
         # associate custom products with subscription
@@ -111,107 +113,37 @@ class CustomCSSummaryView(CSSummaryView):
         return redirect('welcome-with-sub')
 
 
-@create_subscription_session
-def initial_select_size(request, cs_session, **kwargs):
-    if request.method == 'POST':
-        form = SubscriptionPartSelectForm(cs_session.subscriptions, request.POST)
-        if form.is_valid():
-            selected = form.get_selected()
-            cs_session.custom_prod = {}
-            err_msg = quantity_error(selected)
-            if not err_msg or request.POST.get("subscription") == "-1":
-                cs_session.subscriptions = selected
-                return redirect(cs_session.next_page())
-            else:
-                form.add_error(None, err_msg)
-    else:
-        form = SubscriptionPartSelectForm(cs_session.subscriptions)
-
-    render_dict = {
-        'form': form,
-        'subscription_selected': sum(form.get_selected().values()) > 0,
-        'hours_used': Config.assignment_unit() == 'HOURS',
-    }
-    return render(request, 'cs/initial_select_size.html', render_dict)
-
-
-@primary_member_of_subscription
-def size_change(request, subscription_id):
-    """
-    Overriden from core
-    change the size of a subscription
-    """
-    subscription = get_object_or_404(Subscription, id=subscription_id)
-    parts_order_allowed = subscription.waiting or subscription.active
-    if request.method == 'POST' and int(timezone.now().strftime("%m")) <= Config.business_year_cancelation_month():
-        if not parts_order_allowed:
-            raise ValidationError(_('Für gekündigte {} können keine Bestandteile bestellt werden').
-                                  format(Config.vocabulary('subscription_pl')), code='invalid')
-        form = SubscriptionPartOrderForm(subscription, request.POST)
-        if form.is_valid():
-            selected = form.get_selected()
-            err_msg = quantity_error(selected, subscription.active_and_future_parts)
-            if not err_msg:
-                create_subscription_parts(subscription, selected)
-                return redirect("content_edit", subscription_id=subscription_id)
-            else:
-                form.add_error(None, err_msg)
-    else:
-        form = SubscriptionPartOrderForm()
-    renderdict = {
-        'form': form,
-        'subscription': subscription,
-        'hours_used': Config.assignment_unit() == 'HOURS',
-        'next_cancel_date': temporal.next_cancelation_date(),
-        'parts_order_allowed': parts_order_allowed,
-    }
-    return render(request, 'size_change.html', renderdict)
-
-
 @primary_member_of_subscription
 def cancel_part(request, part_id, subscription_id):
     """
     Overriden from core to redirect to the content change page
     """
     part = get_object_or_404(SubscriptionPart, subscription__id=subscription_id, id=part_id)
-    if part.activation_date is None:
-        part.delete()
-    else:
-        part.cancel()
+    part.cancel()
+    adminnotification.subpart_canceled(part)
     return redirect("content_edit", subscription_id=subscription_id)
 
 
-def quantity_error(selected, active_parts=None):
+@primary_member_of_subscription_of_part
+def part_change(request, part):
     """
-    validates the selected quantities for Basimilch's usecase
-    selected is a dictionnary with SubscriptionType objects as keys and amounts as values
+    Overriden from core to redirect to the content change page
     """
-    present4 = 0
-    present8 = 0
-    present2 = 0
+    result = views_subscription.part_change(request, part_id=part.id)
+    if isinstance(result, HttpResponseRedirect):
+        return redirect("content_edit", subscription_id=part.subscription.id)
+    return result
 
-    if active_parts:
-        present4 = active_parts.filter(type__size__units=4).count()
-        present8 = active_parts.filter(type__size__units=8).count()
-        present2 = active_parts.filter(type__size__units=2).count()
 
-    selected4 = selected[SubscriptionType.objects.get(size__units=4)]
-    selected8 = selected[SubscriptionType.objects.get(size__units=8)]
-    selected2 = selected[SubscriptionType.objects.get(size__units=2)]
-
-    totalNew4 = present4 + selected4
-    totalNew8 = present8 + selected8
-    totalNew2 = present2 + selected2
-
-    total_liters = totalNew4 * 4 + totalNew8 * 8 + totalNew2 * 2
-    if total_liters < 4:
-        return "Falls ein Abo gewünscht ist, müssen mindestens 4 Liter in einem Abo sein."
-    required8 = total_liters // 8
-    required4 = (total_liters % 8) // 4
-    if not (totalNew8 == required8 and totalNew4 == required4):
-        return "Du musst immer die grösstmögliche Abogrösse nehmen. \
-            Es ist zum Beispiel nicht möglich, 8 Liter auf zwei Vierliter-Abos aufzuteilen."
-    return ""
+@primary_member_of_subscription
+def part_order(request, subscription_id, extra=False):
+    """
+    Overriden from core to redirect to the content change page
+    """
+    result = subscription_view.part_order(request, subscription_id=subscription_id, extra=extra)
+    if isinstance(result, HttpResponseRedirect):
+        return redirect("content_edit", subscription_id=subscription_id)
+    return result
 
 
 @primary_member_of_subscription
@@ -271,7 +203,7 @@ def initial_select_content(request, cs_session):
             return redirect(cs_session.next_page())
         else:
             cs_session.error = error
-            return redirect(reverse("custom_sub_initial_select"))
+            return redirect("custom_sub_initial_select")
     subs_types = {subs_type: amount for subs_type, amount in cs_session.subscriptions.items() if amount > 0}
     for p in products:
         p.min_amount = determine_min_amount(p, subs_types)

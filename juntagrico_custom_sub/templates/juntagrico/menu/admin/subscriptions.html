@@ -1,0 +1,12 @@
+{% extends 'juntagrico/menu/admin/subscriptions.html' %}
+{% load i18n %}
+{% block extend %}
+    {% if perms.juntagrico.is_operations_group %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'content_change_list' %}">
+                {% trans "Inhalt-Änderungen" %}
+            </a>
+        </li>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
