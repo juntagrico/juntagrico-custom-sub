@@ -278,7 +278,7 @@ def list_content_changes(request, subscription_id=None):
     changedlist = []
     subscriptions_list = SubscriptionDao.all_active_subscritions()
     for subscription in subscriptions_list:
-        if subscription.content.content_changed:
+        if subscription.custom.content_changed:
             changedlist.append(subscription)
     return subscription_management_list(changedlist, render_dict, "cs/list_content_changes.html", request)
 
@@ -286,10 +286,10 @@ def list_content_changes(request, subscription_id=None):
 @permission_required("juntagrico.is_operations_group")
 def activate_future_content(request, subscription_id):
     subscription = get_object_or_404(Subscription, id=subscription_id)
-    for content in subscription.content.products.all():
+    for content in subscription.custom.products.all():
         content.delete()
-    for content in subscription.content.future_products.all():
+    for content in subscription.custom.future_products.all():
         SubscriptionContentItem.objects.create(
-            subscription_content=subscription.content, amount=content.amount, product=content.product
+            subscription_content=subscription.custom, amount=content.amount, product=content.product
         )
     return return_to_previous_location(request)

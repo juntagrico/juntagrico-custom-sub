@@ -128,8 +128,8 @@
                 </td>
                 {% for product in products %}
                     <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
-                        {% if sub.content.amounts_for_products|get_item:product != 0 %} <span>
-                    {{ sub.content.amounts_for_products|get_item:product }} </span> {% endif %}</td>
+                        {% if sub.custom.amounts_for_products|get_item:product != 0 %} <span>
+                    {{ sub.custom.amounts_for_products|get_item:product }} </span> {% endif %}</td>
                 {% endfor %}
                 <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
             </tr>

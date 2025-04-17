@@ -52,10 +52,10 @@
                     </form>
                 </td>
                 <td>
-                    {{ subscription.content.display_content|join:"<br/>" }}
+                    {{ subscription.custom.display_content|join:"<br/>" }}
                 </td>
                 <td>
-                    {{ subscription.content.display_future_content|join:"<br/>" }}
+                    {{ subscription.custom.display_future_content|join:"<br/>" }}
                 </td>
                 <td>
                     <a href="/cs/content/change/{{ subscription.id }}/" class="btn btn-success">

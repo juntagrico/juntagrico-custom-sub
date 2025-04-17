@@ -4,18 +4,18 @@
         {% trans "Inhalt" %}
     </div>
     <div class="col-md-9">
-        {% if subscription.content.content_changed %}
+        {% if subscription.custom.content_changed %}
             <strong>{% trans "Aktuell" %}</strong>
         {% endif %}
         <ul>
-        {% for content in subscription.content.display_content %}
+        {% for content in subscription.custom.display_content %}
             <li>{{ content }}</li>
         {% endfor %}
         </ul>
-        {% if subscription.content.content_changed %}
+        {% if subscription.custom.content_changed %}
             <strong>{% trans "Zukünftig" %}</strong>
             <ul>
-            {% for content in subscription.content.display_future_content %}
+            {% for content in subscription.custom.display_future_content %}
                 <li>{{ content }}</li>
             {% endfor %}
             </ul>

@@ -5,7 +5,7 @@
         {% trans "Inhalt" %}
     </div>
     <div class="col-md-9">
-        {% for content in subscription.content.display_content %}
+        {% for content in subscription.custom.display_content %}
             <p>{{ content }}</p>
         {% endfor %}
     </div>

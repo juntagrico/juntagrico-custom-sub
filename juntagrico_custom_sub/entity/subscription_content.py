@@ -8,7 +8,7 @@ from juntagrico_custom_sub.entity.product import Product
 
 
 class SubscriptionContent(models.Model):
-    subscription = models.OneToOneField(Subscription, on_delete=models.CASCADE, related_name="content")
+    subscription = models.OneToOneField(Subscription, on_delete=models.CASCADE, related_name="custom")
 
     def __str__(self):
         return "Inhalt von Abo " + str(self.subscription.id)
