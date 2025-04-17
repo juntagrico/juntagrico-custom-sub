@@ -41,6 +41,6 @@ include = ["juntagrico_custom_sub*"]
 [tool.setuptools.dynamic]
 version = {attr = "juntagrico_custom_sub.__version__"}
 
-[tool.ruff]
+[tool.ruff.lint]
 select = ["E", "F", "B"]
 ignore = ["E501"]
