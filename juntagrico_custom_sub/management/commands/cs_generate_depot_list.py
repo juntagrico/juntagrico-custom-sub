@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from juntagrico.config import Config
 from juntagrico.util.pdf import render_to_pdf_storage
+from juntagrico.util.temporal import weekdays
 
 from juntagrico_custom_sub.entity.cs_depot import CsDepot
 from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery
@@ -48,7 +49,8 @@ class Command(BaseCommand):
         overallTotal = [0] * len(deliveryProducts)
         grouped_depots = {}
         for depot in depots:
-            grouped_depots.setdefault(depot.weekday_name, []).append(depot)
+            wd = weekdays[depot.weekday]
+            grouped_depots.setdefault(wd, []).append(depot)
         totals = {}
         for weekday, depot_list in grouped_depots.items():
             total = [0] * len(deliveryProducts)
