@@ -14,21 +14,25 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         # Named (optional) arguments
         parser.add_argument(
-            '--force',
-            action='store_true',
-            dest='force',
+            "--force",
+            action="store_true",
+            dest="force",
             default=False,
-            help='force generation of depot list',
+            help="force generation of depot list",
         )
 
     def handle(self, *args, **options):
-        if not options['force'] and timezone.now().weekday() not in Config.depot_list_generation_days():
+        if (
+            not options["force"]
+            and timezone.now().weekday() not in Config.depot_list_generation_days()
+        ):
             print(
-                'not the specified day for depot list generation, use --force to override')
+                "not the specified day for depot list generation, use --force to override"
+            )
             return
-        depots = CsDepot.objects.all().filter(depot_list=True).order_by('sort_order')
-        products = Product.objects.all().order_by('code')
-        latest_delivery = CustomDelivery.objects.all().order_by('-delivery_date')[0]
+        depots = CsDepot.objects.all().filter(depot_list=True).order_by("sort_order")
+        products = Product.objects.all().order_by("code")
+        latest_delivery = CustomDelivery.objects.all().order_by("-delivery_date")[0]
 
         # Rename products based on their name in the latest delivery
         deliveryProducts = []
@@ -56,18 +60,20 @@ class Command(BaseCommand):
             totals[weekday] = total
 
         renderdict_depotlist = {
-            'depots': depots,
-            'products': deliveryProducts,
-            'comment': latest_delivery.delivery_comment
+            "depots": depots,
+            "products": deliveryProducts,
+            "comment": latest_delivery.delivery_comment,
         }
-        render_to_pdf_storage('cs/exports/cs_depolist.html',
-                              renderdict_depotlist, 'depotlist.pdf')
+        render_to_pdf_storage(
+            "cs/exports/cs_depolist.html", renderdict_depotlist, "depotlist.pdf"
+        )
 
         renderdict_packlist = {
-            'depots': grouped_depots,
-            'products': deliveryProducts,
-            'totals': totals,
-            'overallTotals': overallTotal
+            "depots": grouped_depots,
+            "products": deliveryProducts,
+            "totals": totals,
+            "overallTotals": overallTotal,
         }
-        render_to_pdf_storage('cs/exports/cs_packlist.html',
-                              renderdict_packlist, 'depot_overview.pdf')
+        render_to_pdf_storage(
+            "cs/exports/cs_packlist.html", renderdict_packlist, "depot_overview.pdf"
+        )
