@@ -30,8 +30,8 @@ class JuntagricoCustomSubTestCase(TestCase):
         cls.depot1 = cls.create_depot(cls.member1, cls.location1)
         cls.subscription_type1 = cls.create_subscription_type1()
         cls.subscription1 = cls.create_subscription_with_member(cls.member1, cls.depot1, cls.subscription_type1)
-        cls.product1 = cls.create_product("1", "Product1")
-        cls.product2 = cls.create_product("2", "Product2", 2, "pieces")
+        cls.product1 = cls.create_product("code1", "Product1", )
+        cls.product2 = cls.create_product("code2", "Product2", 2, "pieces")
         cls.custom_delivery = cls.create_custom_delivery([cls.product1, cls.product2])
         mail.outbox.clear()
 

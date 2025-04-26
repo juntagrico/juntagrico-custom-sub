@@ -5,11 +5,12 @@ from test import JuntagricoCustomSubTestCase
 
 
 class CustomSubTests(JuntagricoCustomSubTestCase):
-    def setUp(self):
-        super().setUp()
-        self.create_subscription_content(self.subscription1)
-        self.create_product()
-        self.create_product(
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.create_subscription_content(cls.subscription1)
+        cls.create_product()
+        cls.create_product(
             "2",
             name="Wochenkäse klein",
             units=2,
@@ -29,8 +30,9 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
 
     def testContentChange(self):
         self.assertGet(reverse('content_edit', args=[self.subscription1.pk]))
-        self.assertPost(reverse('content_edit', args=[self.subscription1.pk]),
-                        {'saveContent': True, 'amount1': '1', 'amount2': '1'}, code=302)
+        self.assertPost(reverse('content_edit', args=[self.subscription1.pk]), {
+            'saveContent': True, 'amount1': '0', 'amount2': '0', 'amount3': '1', 'amount4': '1'
+        }, code=302)
         self.subscription1.refresh_from_db()
         self.assertEqual(self.subscription1.custom.future_products.get(id=1).amount, 1)
 
