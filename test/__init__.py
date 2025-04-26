@@ -9,6 +9,7 @@ from juntagrico.entity.member import Member
 from juntagrico.entity.subs import Subscription, SubscriptionPart
 from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionSize, SubscriptionType
 
+from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery, CustomDeliveryProduct
 from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
 
@@ -29,6 +30,9 @@ class JuntagricoCustomSubTestCase(TestCase):
         cls.depot1 = cls.create_depot(cls.member1, cls.location1)
         cls.subscription_type1 = cls.create_subscription_type1()
         cls.subscription1 = cls.create_subscription_with_member(cls.member1, cls.depot1, cls.subscription_type1)
+        cls.product1 = cls.create_product("1", "Product1")
+        cls.product2 = cls.create_product("2", "Product2", 2, "pieces")
+        cls.custom_delivery = cls.create_custom_delivery([cls.product1, cls.product2])
         mail.outbox.clear()
 
     @staticmethod
@@ -151,6 +155,13 @@ class JuntagricoCustomSubTestCase(TestCase):
     @staticmethod
     def create_product(code="1", name="Rohmilch", units=1, unit_name="Liter", **kwargs):
         return Product.objects.create(code=code, name=name, units=units, unit_name=unit_name, **kwargs)
+
+    @staticmethod
+    def create_custom_delivery(products):
+        delivery = CustomDelivery.objects.create(delivery_date=datetime.date.today(), delivery_comment='test comment')
+        for product in products:
+            CustomDeliveryProduct.objects.create(delivery=delivery, product=product, name=str(product) + ' name')
+        return delivery
 
     def assertGet(self, url, code=200, member=None):
         login_member = member or self.member1
