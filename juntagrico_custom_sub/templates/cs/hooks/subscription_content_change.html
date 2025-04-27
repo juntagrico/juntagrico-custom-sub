@@ -9,12 +9,12 @@
     </div>
     <div class="col-md-4">
         {% trans "Aktuell" %}: <br/>
-        {% for content in subscription.content.display_content %}
+        {% for content in subscription.custom.display_content %}
             {{ content }}<br/>
         {% endfor %}
         <br/>
         {% trans "Zukünftig" %}: <br/>
-        {% for content in subscription.content.display_future_content %}
+        {% for content in subscription.custom.display_future_content %}
             {{ content }}<br/>
         {% endfor %}
     </div>

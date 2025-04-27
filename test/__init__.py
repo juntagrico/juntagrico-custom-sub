@@ -1,5 +1,4 @@
 import datetime
-from functools import cached_property
 
 from django.test import TestCase, override_settings
 from django.core import mail
@@ -10,6 +9,7 @@ from juntagrico.entity.member import Member
 from juntagrico.entity.subs import Subscription, SubscriptionPart
 from juntagrico.entity.subtypes import SubscriptionProduct, SubscriptionSize, SubscriptionType
 
+from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery, CustomDeliveryProduct
 from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
 
@@ -19,7 +19,20 @@ class JuntagricoCustomSubTestCase(TestCase):
 
     _count_sub_types = 0
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
+        cls.member1 = cls.create_member('email1@email.org')
+        cls.admin = cls.create_member('admin@example.com')
+        cls.admin.user.is_superuser = True
+        cls.admin.user.is_staff = True
+        cls.admin.user.save()
+        cls.location1 = cls.create_location()
+        cls.depot1 = cls.create_depot(cls.member1, cls.location1)
+        cls.subscription_type1 = cls.create_subscription_type1()
+        cls.subscription1 = cls.create_subscription_with_member(cls.member1, cls.depot1, cls.subscription_type1)
+        cls.product1 = cls.create_product("code1", "Product1", )
+        cls.product2 = cls.create_product("code2", "Product2", 2, "pieces")
+        cls.custom_delivery = cls.create_custom_delivery([cls.product1, cls.product2])
         mail.outbox.clear()
 
     @staticmethod
@@ -39,10 +52,6 @@ class JuntagricoCustomSubTestCase(TestCase):
         member.user.save()
         return member
 
-    @cached_property
-    def member1(self):
-        return self.create_member('email1@email.org')
-
     @staticmethod
     def create_location():
         location_data = {'name': 'Depot location',
@@ -54,21 +63,15 @@ class JuntagricoCustomSubTestCase(TestCase):
                          'description': 'Place to be'}
         return Location.objects.create(**location_data)
 
-    @cached_property
-    def location1(self):
-        return self.create_location()
-
-    def create_depot(self):
+    @staticmethod
+    def create_depot(contact, location):
         depot_data = {
             'name': 'depot',
-            'contact': self.member1,
+            'contact': contact,
             'weekday': 1,
-            'location': self.location1}
+            'location': location
+        }
         return Depot.objects.create(**depot_data)
-
-    @cached_property
-    def depot1(self):
-        return self.create_depot()
 
     @staticmethod
     def create_sub_type(size, shares=1, visible=True, required_assignments=10, required_core_assignments=3, price=1000, **kwargs):
@@ -87,8 +90,8 @@ class JuntagricoCustomSubTestCase(TestCase):
             **kwargs
         )
 
-    @cached_property
-    def subscription_type1(self):
+    @classmethod
+    def create_subscription_type1(cls):
         """
         subscription product, size and types
         """
@@ -106,7 +109,7 @@ class JuntagricoCustomSubTestCase(TestCase):
             'description': 'sub_desc'
         }
         sub_size = SubscriptionSize.objects.create(**sub_size_data)
-        return self.create_sub_type(sub_size)
+        return cls.create_sub_type(sub_size)
 
     @staticmethod
     def create_sub(depot, activation_date=None, parts=None, **kwargs):
@@ -134,14 +137,14 @@ class JuntagricoCustomSubTestCase(TestCase):
     def create_sub_now(cls, depot, **kwargs):
         return cls.create_sub(depot, datetime.date.today(), **kwargs)
 
-    @cached_property
-    def subscription1(self):
+    @classmethod
+    def create_subscription_with_member(cls, member, depot, subscription_type):
         """
         subscription
         """
-        sub = self.create_sub_now(self.depot1)
-        self.member1.join_subscription(sub, True)
-        SubscriptionPart.objects.create(subscription=sub, type=self.subscription_type1,
+        sub = cls.create_sub_now(depot)
+        member.join_subscription(sub, True)
+        SubscriptionPart.objects.create(subscription=sub, type=subscription_type,
                                         activation_date=datetime.date.today())
         return sub
 
@@ -152,6 +155,13 @@ class JuntagricoCustomSubTestCase(TestCase):
     @staticmethod
     def create_product(code="1", name="Rohmilch", units=1, unit_name="Liter", **kwargs):
         return Product.objects.create(code=code, name=name, units=units, unit_name=unit_name, **kwargs)
+
+    @staticmethod
+    def create_custom_delivery(products):
+        delivery = CustomDelivery.objects.create(delivery_date=datetime.date.today(), delivery_comment='test comment')
+        for product in products:
+            CustomDeliveryProduct.objects.create(delivery=delivery, product=product, name=str(product) + ' name')
+        return delivery
 
     def assertGet(self, url, code=200, member=None):
         login_member = member or self.member1
