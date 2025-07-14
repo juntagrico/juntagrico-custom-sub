@@ -104,7 +104,7 @@
 </div>
 {% for depot in depots %}
     <h1>Basimilch Aboliste</h1>
-    <h2 style="font-size: 18px;">{{ depot.weekday_name }} - {{ depot.name }}</h2>
+    <h2 style="font-size: 18px;">{{ depot.tour.name }} - {{ depot.name }}</h2>
     <div class="contact">
         <div class="no-padding"><b>{% blocktrans %}{{ v_depot }}-Betreuung{% endblocktrans %}</b></div>
         <div class="no-padding">{{ depot.contact.first_name }} {{ depot.contact.last_name }}</div>
