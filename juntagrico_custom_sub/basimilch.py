@@ -18,9 +18,9 @@ def quantity_error(form):
         present2 = active_parts.filter(type__size__units=2).count()
 
     selected = form.get_selected()
-    selected4 = selected[SubscriptionType.objects.get(size__units=4)]
-    selected8 = selected[SubscriptionType.objects.get(size__units=8)]
-    selected2 = selected[SubscriptionType.objects.get(size__units=2)]
+    selected4 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=4))
+    selected8 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=8))
+    selected2 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=2))
 
     totalNew4 = present4 + selected4
     totalNew8 = present8 + selected8
