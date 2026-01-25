@@ -13,14 +13,14 @@ def quantity_error(form):
 
     if hasattr(form, 'subscription'):
         active_parts = form.subscription.active_and_future_parts
-        present4 = active_parts.filter(type__size__units=4).count()
-        present8 = active_parts.filter(type__size__units=8).count()
-        present2 = active_parts.filter(type__size__units=2).count()
+        present4 = active_parts.filter(type__bundle__product_sizes__units=4).count()
+        present8 = active_parts.filter(type__bundle__product_sizes__units=8).count()
+        present2 = active_parts.filter(type__bundle__product_sizes__units=2).count()
 
     selected = form.get_selected()
-    selected4 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=4))
-    selected8 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=8))
-    selected2 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(size__units=2))
+    selected4 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(bundle__product_sizes__units=4))
+    selected8 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(bundle__product_sizes__units=8))
+    selected2 = sum(selected[selection_type] for selection_type in SubscriptionType.objects.filter(bundle__product_sizes__units=2))
 
     totalNew4 = present4 + selected4
     totalNew8 = present8 + selected8

@@ -1,7 +1,7 @@
 from io import StringIO
-from unittest import TestCase
 
 from django.core.management import call_command
+from django.test import TestCase
 
 from test import JuntagricoCustomSubTestCase
 

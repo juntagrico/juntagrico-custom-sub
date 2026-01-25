@@ -17,13 +17,15 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "fontawesomefree",
     "impersonate",
-    "import_export",
-    "crispy_forms",
-    "adminsortable2",
-    "djrichtextfield",
-    "polymorphic",
     "juntagrico_custom_sub",
     "juntagrico",
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "adminsortable2",
+    "django_select2",
+    "polymorphic",
+    "import_export",
+    "djrichtextfield",
 ]
 
 DATABASES = {
@@ -119,8 +121,6 @@ TEMPLATES = [
 
 LOGIN_REDIRECT_URL = "/"
 
-SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
-
 IMPERSONATE = {
     "REDIRECT_URL": "/my/profile",
 }
@@ -128,3 +128,5 @@ IMPERSONATE = {
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 ENABLE_SHARES = True
+
+SIGNUP_MANAGER = "juntagrico_custom_sub.util.sessions.SignupManager"

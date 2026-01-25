@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='subscriptionsizemandatoryproducts',
             name='subscription_size',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='juntagrico.SubscriptionSize'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='juntagrico.ProductSize'),
         ),
         migrations.AddField(
             model_name='subscriptioncontentitem',
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
             name='mandatory_for_sizes',
             field=models.ManyToManyField(related_name='mandatory_products',
                                          through='juntagrico_custom_sub.SubscriptionSizeMandatoryProducts',
-                                         to='juntagrico.SubscriptionSize'),
+                                         to='juntagrico.ProductSize'),
         ),
         migrations.AlterUniqueTogether(
             name='subscriptioncontentitem',

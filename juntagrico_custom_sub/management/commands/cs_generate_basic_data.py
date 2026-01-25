@@ -7,6 +7,22 @@ from django.db import transaction
 from juntagrico_custom_sub import entity as csm
 
 
+def create_bundle(category, product_size, size=4, bundle_name=None):
+    bundle_fields = {
+        'long_name': bundle_name or f'{size} Liter',
+        'category': category,
+        'description': f'{size} Liter Abo enthält Produkte die {size} Liter Milch entsprechen.'
+    }
+    bundle = jm.subtypes.SubscriptionBundle.objects.filter(
+        long_name=bundle_name, category=bundle_fields['category']
+    ).first()
+    if not bundle:
+        bundle = jm.subtypes.SubscriptionBundle.objects.create(**bundle_fields)
+    if product_size not in bundle.product_sizes.all():
+        jm.subtypes.SubscriptionBundleProductSize.objects.create(bundle=bundle, product_size=product_size)
+    return bundle
+
+
 class Command(BaseCommand):
 
     # entry point used by manage.py
@@ -16,38 +32,34 @@ class Command(BaseCommand):
         subproduct = jm.subtypes.SubscriptionProduct.objects.create(**subprod_fields)
         subsize1_fields = {
             "name": "4 Liter",
-            "long_name": "4 Liter Abo",
             "units": 4,
-            "visible": True,
-            "depot_list": True,
             "product": subproduct,
-            "description": "Enthält Produkte, die 4 Liter Milch entsprechen.",
         }
         subsize3_fields = {
             "name": "8 Liter",
-            "long_name": "8 Liter Abo",
             "units": 8,
-            "visible": True,
-            "depot_list": True,
             "product": subproduct,
-            "description": "Enthält Produkte, die 8 Litern Milch entsprechen.",
         }
         subsize4_fields = {
             "name": "2 Liter",
-            "long_name": "2 Liter Abo",
             "units": 2,
-            "visible": True,
-            "depot_list": True,
             "product": subproduct,
-            "description": "Enthält Produkte, die 2 Litern Milch entsprechen.",
         }
-        subsize1 = jm.subtypes.SubscriptionSize.objects.create(**subsize1_fields)
-        subsize3 = jm.subtypes.SubscriptionSize.objects.create(**subsize3_fields)
-        subsize4 = jm.subtypes.SubscriptionSize.objects.create(**subsize4_fields)
+        subsize1 = jm.subtypes.ProductSize.objects.create(**subsize1_fields)
+        subsize3 = jm.subtypes.ProductSize.objects.create(**subsize3_fields)
+        subsize4 = jm.subtypes.ProductSize.objects.create(**subsize4_fields)
+
+        category, _ = jm.subtypes.SubscriptionCategory.objects.get_or_create(
+            name='Kategorie 1', description='Beschreibung 1'
+        )
+        bundle1 = create_bundle(category, subsize1, 4)
+        bundle2 = create_bundle(category, subsize3, 8)
+        bundle4 = create_bundle(category, subsize4, 2)
+
         subtrype1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
-            "size": subsize1,
+            "bundle": bundle1,
             "shares": 1,
             "visible": True,
             "required_assignments": 2,
@@ -57,7 +69,7 @@ class Command(BaseCommand):
         subtrype3_fields = {
             "name": "8 Liter",
             "long_name": "8 Liter",
-            "size": subsize3,
+            "bundle": bundle2,
             "shares": 2,
             "visible": True,
             "required_assignments": 4,
@@ -67,7 +79,7 @@ class Command(BaseCommand):
         subtrype4_fields = {
             "name": "2 Liter",
             "long_name": "2 Liter",
-            "size": subsize4,
+            "bundle": bundle4,
             "shares": 0,
             "visible": True,
             "required_assignments": 1,

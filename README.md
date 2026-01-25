@@ -33,6 +33,13 @@ INSTALLED_APPS = [
 ]
 ```
 
+Set the signup manager to include the additional step during signup
+
+```python
+SIGNUP_MANAGER = "juntagrico_custom_sub.util.sessions.SignupManager"
+```
+
+
 In your `urls.py` you also need to extend the pattern:
 
 ```python
