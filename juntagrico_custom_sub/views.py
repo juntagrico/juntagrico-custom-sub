@@ -21,7 +21,7 @@ from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
 from juntagrico_custom_sub.entity.subscription_content_future_item import SubscriptionContentFutureItem
 from juntagrico_custom_sub.entity.subscription_content_item import SubscriptionContentItem
-from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
+from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionBundleMandatoryProducts
 from juntagrico_custom_sub.util.sub_content import new_content_valid
 
 logger = logging.getLogger(__name__)
@@ -74,8 +74,8 @@ def subscription_select_content(request, subscription_id):
     )
 
     # products to be considered are only the ones that are editable or mandatory for the chosen sizes
-    mand_products = SubscriptionSizeMandatoryProducts.objects.filter(
-        subscription_size__bundles__types__in=fut_subs_types
+    mand_products = SubscriptionBundleMandatoryProducts.objects.filter(
+        subscription_bundle__types__in=fut_subs_types
     ).values_list("product_id", flat=True)
 
     products = Product.objects.filter(Q(user_editable=True) | Q(id__in=mand_products)).order_by("user_editable", "code")
@@ -164,7 +164,7 @@ def determine_min_amount(product, subs_types):
     Example of subs_sizes: {size_1: amount_1, size_2: amount_2, etc...}
     """
     return sum(
-        product.subscriptionsizemandatoryproducts_set.filter(subscription_size__bundles__types=sub_type).aggregate(
+        product.subscriptionbundlemandatoryproducts_set.filter(subscription_bundle__types=sub_type).aggregate(
             required_amount=Sum('amount')
         ).get('required_amount') or 0 * amount
         for sub_type, amount in subs_types.items()

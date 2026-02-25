@@ -53,10 +53,10 @@ class Command(BaseCommand):
             name='Kategorie 1', description='Beschreibung 1'
         )
         bundle1 = create_bundle(category, subsize1, 4)
-        bundle2 = create_bundle(category, subsize3, 8)
+        bundle3 = create_bundle(category, subsize3, 8)
         bundle4 = create_bundle(category, subsize4, 2)
 
-        subtrype1_fields = {
+        subtype1_fields = {
             "name": "4 Liter",
             "long_name": "4 Liter Abo",
             "bundle": bundle1,
@@ -66,17 +66,17 @@ class Command(BaseCommand):
             "price": 650,
             "description": "4-Liter-Abo.",
         }
-        subtrype3_fields = {
+        subtype3_fields = {
             "name": "8 Liter",
             "long_name": "8 Liter",
-            "bundle": bundle2,
+            "bundle": bundle3,
             "shares": 2,
             "visible": True,
             "required_assignments": 4,
             "price": 1200,
             "description": "8-Liter-Abo.",
         }
-        subtrype4_fields = {
+        subtype4_fields = {
             "name": "2 Liter",
             "long_name": "2 Liter",
             "bundle": bundle4,
@@ -86,9 +86,9 @@ class Command(BaseCommand):
             "price": 300,
             "description": "2-Liter-Abo.",
         }
-        jm.subtypes.SubscriptionType.objects.create(**subtrype1_fields)
-        jm.subtypes.SubscriptionType.objects.create(**subtrype3_fields)
-        jm.subtypes.SubscriptionType.objects.create(**subtrype4_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtype1_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtype3_fields)
+        jm.subtypes.SubscriptionType.objects.create(**subtype4_fields)
 
         # CS specific
         prod1_fields = {
@@ -151,14 +151,14 @@ class Command(BaseCommand):
         wochenkase_gross = csm.product.Product.objects.create(**prod7_fields)
 
         mandatory1_fields = {
-            "subscription_size": subsize1,
+            "subscription_bundle": bundle1,
             "product": wochenkase_klein,
             "amount": 1,
         }
         mandatory3_fields = {
-            "subscription_size": subsize3,
+            "subscription_bundle": bundle3,
             "product": wochenkase_gross,
             "amount": 1,
         }
-        csm.subscription_size_mandatory_products.SubscriptionSizeMandatoryProducts.objects.create(**mandatory1_fields)
-        csm.subscription_size_mandatory_products.SubscriptionSizeMandatoryProducts.objects.create(**mandatory3_fields)
+        csm.subscription_size_mandatory_products.SubscriptionBundleMandatoryProducts.objects.create(**mandatory1_fields)
+        csm.subscription_size_mandatory_products.SubscriptionBundleMandatoryProducts.objects.create(**mandatory3_fields)

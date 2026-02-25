@@ -1,7 +1,7 @@
 from django.core import validators
 from django.db import models
 from django.utils.translation import gettext as _
-from juntagrico.entity.subtypes import ProductSize
+from juntagrico.entity.subtypes import SubscriptionBundle
 
 
 class Product(models.Model):
@@ -9,8 +9,8 @@ class Product(models.Model):
     units = models.FloatField("Grösse", default=0)
     unit_multiplier = models.IntegerField("Grössen multiplikator", default=1)
     unit_name = models.CharField("Name Grösse", max_length=100, default="")
-    mandatory_for_sizes = models.ManyToManyField(ProductSize, related_name='mandatory_products',
-                                                 through='juntagrico_custom_sub.SubscriptionSizeMandatoryProducts')
+    mandatory_for_bundles = models.ManyToManyField(SubscriptionBundle, related_name='mandatory_products',
+                                                 through='juntagrico_custom_sub.SubscriptionBundleMandatoryProducts')
     user_editable = models.BooleanField("Menge durch Nutzer veränderbar", default=True)
     code = models.CharField('Sortier-Code', max_length=100, default='1', validators=[validators.validate_slug],
                             unique=True)

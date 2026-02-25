@@ -15,7 +15,7 @@ from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
 from juntagrico_custom_sub.entity.subscription_content_future_item import SubscriptionContentFutureItem
 from juntagrico_custom_sub.entity.subscription_content_item import SubscriptionContentItem
-from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
+from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionBundleMandatoryProducts
 
 
 def create_bundle(category, product_size, size=4, bundle_name=None):
@@ -77,7 +77,7 @@ class Command(BaseCommand):
             name='Kategorie 1', description='Beschreibung 1'
         )
         bundle1 = create_bundle(category, subsize1, 4)
-        bundle2 = create_bundle(category, subsize3, 8)
+        bundle3 = create_bundle(category, subsize3, 8)
         bundle4 = create_bundle(category, subsize4, 2)
 
         subtype1_fields = {
@@ -93,7 +93,7 @@ class Command(BaseCommand):
         subtype3_fields = {
             "name": "8 Liter",
             "long_name": "8 Liter",
-            "bundle": bundle2,
+            "bundle": bundle3,
             "shares": 2,
             "visible": True,
             "required_assignments": 4,
@@ -200,17 +200,17 @@ class Command(BaseCommand):
         wochenkase_gross, _ = Product.objects.get_or_create(code=prod1_fields['code'], defaults=prod7_fields)
 
         mandatory1_fields = {
-            "subscription_size": subsize1,
+            "subscription_bundle": bundle1,
             "product": wochenkase_klein,
             "amount": 1,
         }
         mandatory3_fields = {
-            "subscription_size": subsize3,
+            "subscription_bundle": bundle3,
             "product": wochenkase_gross,
             "amount": 1,
         }
-        SubscriptionSizeMandatoryProducts.objects.get_or_create(**mandatory1_fields)
-        SubscriptionSizeMandatoryProducts.objects.get_or_create(**mandatory3_fields)
+        SubscriptionBundleMandatoryProducts.objects.get_or_create(**mandatory1_fields)
+        SubscriptionBundleMandatoryProducts.objects.get_or_create(**mandatory3_fields)
 
         subcontent1_fields = {"subscription": subscription_1}
         subcontent2_fields = {"subscription": subscription_2}
@@ -237,7 +237,7 @@ class Command(BaseCommand):
             name="Spezialkäse Einheitsgrösse",
             is_extra=True,
             defaults=dict(
-                bundle=bundle2,
+                bundle=bundle3,
                 description="Einmal pro Monat Überraschungskäse",
                 sort_order=1,
                 visible=True,
