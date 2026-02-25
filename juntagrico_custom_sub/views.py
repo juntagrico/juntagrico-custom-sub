@@ -8,14 +8,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from juntagrico import views_subscription
 from juntagrico.entity.subtypes import SubscriptionType
 from juntagrico.views import subscription as subscription_view
-from juntagrico.dao.subscriptiondao import SubscriptionDao
 from juntagrico.mailer import adminnotification
 from juntagrico.view_decorators import signup_session, primary_member_of_subscription, \
     primary_member_of_subscription_of_part
 from juntagrico.entity.subs import Subscription, SubscriptionPart
 from juntagrico.util import return_to_previous_location
 from juntagrico.util.management_list import get_changedate
-from juntagrico.util.views_admin import subscription_management_list
 
 from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
@@ -193,11 +191,15 @@ def parse_selected_custom_products(post_data, products):
 def list_content_changes(request, subscription_id=None):
     render_dict = get_changedate(request)
     changedlist = []
-    subscriptions_list = SubscriptionDao.all_active_subscritions()
+    subscriptions_list = Subscription.objects.active().filter(custom__isnull=False)
     for subscription in subscriptions_list:
         if subscription.custom.content_changed:
             changedlist.append(subscription)
-    return subscription_management_list(changedlist, render_dict, "cs/list_content_changes.html", request)
+
+    render_dict.update({
+        'management_list': changedlist,
+    })
+    return render(request, "cs/list_content_changes.html", render_dict)
 
 
 @permission_required("juntagrico.is_operations_group")
