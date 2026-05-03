@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "juntagrico.apps.JuntagricoAdminConfig",
-    "fontawesomefree",
     "impersonate",
     "juntagrico_custom_sub",
     "juntagrico",
@@ -51,6 +50,8 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "impersonate.middleware.ImpersonateMiddleware",
 )
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = os.environ.get("JUNTAGRICO_EMAIL_HOST")
 EMAIL_HOST_USER = os.environ.get("JUNTAGRICO_EMAIL_USER")

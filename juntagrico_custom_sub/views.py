@@ -118,7 +118,7 @@ def initial_select_content(request, signup_manager):
 
     for p in products:
         p.min_amount = determine_min_amount(p, subs_types)
-        p.amount_in_subscription = signup_manager.get('custom_products', {}).get(p.id, p.min_amount)
+        p.amount_in_subscription = signup_manager.get('custom_products', {}).get(str(p.id), p.min_amount)
 
     total_units = sum(
         sub_type.bundle.product_sizes.aggregate(units=Sum('units'))['units'] * amount
