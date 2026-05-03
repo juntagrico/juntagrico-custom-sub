@@ -1,6 +1,9 @@
 # test_settings.py
 import os
 
+from juntagrico import defaults
+from juntagrico_custom_sub import defaults as cs_defaults
+
 DEBUG = True
 
 SECRET_KEY = "fake-key"
@@ -128,6 +131,10 @@ IMPERSONATE = {
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
+DJRICHTEXTFIELD_CONFIG = defaults.richtextfield_config(LANGUAGE_CODE)
+
 ENABLE_SHARES = True
 
 SIGNUP_MANAGER = "juntagrico_custom_sub.util.sessions.SignupManager"
+
+DEPOT_LISTS = cs_defaults.DEPOT_LISTS

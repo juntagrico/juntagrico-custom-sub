@@ -40,6 +40,14 @@ SIGNUP_MANAGER = "juntagrico_custom_sub.util.sessions.SignupManager"
 ```
 
 
+and configure the depot lists.
+
+```python
+from juntagrico_custom_sub import defaults as cs_defaults
+DEPOT_LISTS = cs_defaults.DEPOT_LISTS
+```
+
+
 In your `urls.py` you also need to extend the pattern:
 
 ```python
