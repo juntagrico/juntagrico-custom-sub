@@ -1,15 +1,11 @@
 import datetime
 
-from django.test import TestCase, override_settings
 from django.core import mail
 
 from juntagrico.tests import JuntagricoTestCase
 
 from juntagrico.entity.depot import Depot
-from juntagrico.entity.location import Location
-from juntagrico.entity.member import Member
-from juntagrico.entity.subs import Subscription, SubscriptionPart
-from juntagrico.entity.subtypes import SubscriptionProduct, ProductSize, SubscriptionType, SubscriptionCategory, \
+from juntagrico.entity.subtypes import SubscriptionProduct, ProductSize, SubscriptionCategory, \
     SubscriptionBundleProductSize
 
 from juntagrico_custom_sub.entity.custom_delivery import CustomDelivery, CustomDeliveryProduct

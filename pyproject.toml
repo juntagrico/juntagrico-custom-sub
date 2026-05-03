@@ -46,3 +46,16 @@ version = {attr = "juntagrico_custom_sub.__version__"}
 [tool.ruff.lint]
 select = ["E", "F", "B"]
 ignore = ["E501"]
+
+[tool.coverage.run]
+plugins = ["django_coverage_plugin"]
+include = ["juntagrico_custom_sub/*"]
+omit = ["juntagrico_custom_sub/migrations/*"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.13.1",
+    "django-coverage-plugin>=3.2.0",
+    "pre-commit>=4.5.1",
+    "ruff>=0.14.11",
+]
