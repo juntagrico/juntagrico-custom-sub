@@ -162,9 +162,11 @@ def determine_min_amount(product, subs_types):
     Example of subs_sizes: {size_1: amount_1, size_2: amount_2, etc...}
     """
     return sum(
-        product.subscriptionbundlemandatoryproducts_set.filter(subscription_bundle__types=sub_type).aggregate(
-            required_amount=Sum('amount')
-        ).get('required_amount') or 0 * amount
+        (
+            product.subscriptionbundlemandatoryproducts_set.filter(subscription_bundle__types=sub_type).aggregate(
+                required_amount=Sum('amount')
+            ).get('required_amount') or 0
+        ) * amount
         for sub_type, amount in subs_types.items()
     )
 
