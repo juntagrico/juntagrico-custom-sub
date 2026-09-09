@@ -14,6 +14,7 @@ class SignupManager(sessions.SignupManager):
             # associate custom products with subscription
             add_products_to_subscription(subscription.id, custom_prod, SubscriptionContentItem)
             add_products_to_subscription(subscription.id, custom_prod, SubscriptionContentFutureItem)
+        return subscription
 
     def get_next_page(self):
         next_page = super().get_next_page()
