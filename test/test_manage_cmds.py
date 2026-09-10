@@ -1,7 +1,7 @@
 from io import StringIO
-from unittest import TestCase
 
 from django.core.management import call_command
+from django.test import TestCase
 
 from test import JuntagricoCustomSubTestCase
 
@@ -21,5 +21,5 @@ class ManagementCommandsTest(TestCase):
 class DepotlistTests(JuntagricoCustomSubTestCase):
     def test_cs_depot_list(self):
         out = StringIO()
-        call_command('cs_generate_depot_list', '--force', stdout=out)
+        call_command('generate_depot_list', '--force', stdout=out)
         self.assertEqual(out.getvalue(), '')

@@ -1,0 +1,18 @@
+{% extends "juntagrico/subscription/create/summary.html" %}
+{% load jcs.snippets %}
+{% load i18n %}
+{% load juntagrico.config %}
+{% load crispy_forms_tags %}
+
+{% block subscription %}
+    {{ block.super }}
+    
+    <h4>
+        {% trans "Inhalt" %}
+        <a href="{% url 'custom_sub_initial_select' %}?mod=1" class="edit">
+            <i class="bi bi-pencil-square"></i>
+        </a>
+    </h4>
+
+    {% custom_product_summary custom_products %}
+{% endblock %}

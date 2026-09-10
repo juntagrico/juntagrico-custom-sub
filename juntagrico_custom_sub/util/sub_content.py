@@ -1,27 +1,19 @@
 from juntagrico_custom_sub.entity.product import Product
-from juntagrico_custom_sub.entity.subscription_size_mandatory_products import SubscriptionSizeMandatoryProducts
 
 
-def new_content_valid(future_types, custom_prods, products=None):
+def new_content_valid(total_units, custom_prods, products=None):
     products = products or Product.objects.all()
     totalUnits = 0
-    total_units_required = sum([ft.size.units * amount for ft, amount in future_types.items()])
     for product in products:
-        minimalAmountForProduct = 0
-        for sub_type in future_types:
-            for mandatoryProduct in SubscriptionSizeMandatoryProducts.objects.filter(
-                    product=product, subscription_size=sub_type.size
-            ):
-                minimalAmountForProduct += mandatoryProduct.amount
-        productAmount = 0 if product not in custom_prods else custom_prods[product]
+        productAmount = custom_prods.get(product.id, 0)
         if productAmount < 0:
             return "Mengen unter Null sind nicht erlaubt."
-        if productAmount < minimalAmountForProduct:
-            return "Mindestens " + str(minimalAmountForProduct) + " " + product.name + " benötigt."
+        if productAmount < product.min_amount:
+            return "Mindestens " + str(product.min_amount) + " " + product.name + " benötigt."
         totalUnits += productAmount * product.units
-    if totalUnits > total_units_required:
+    if totalUnits > total_units:
         return "Dein Abo hat nicht genug Platz für alle Produkte."
-    if totalUnits < total_units_required:
+    if totalUnits < total_units:
         return "Nicht alle Einheiten zugewiesen."
     return ""
 

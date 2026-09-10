@@ -1,3 +1,5 @@
 -e .
-coverage
+coverage[toml]
+django-coverage-plugin
 ruff
+pre-commit

@@ -104,12 +104,14 @@
 </div>
 {% for depot in depots %}
     <h1>Basimilch Aboliste</h1>
-    <h2 style="font-size: 18px;">{{ depot.tour.name }} - {{ depot.name }}</h2>
+    <h2 style="font-size: 18px;">{% if depot.tour %}{{ depot.tour.name }} - {% endif %}{{ depot.name }}</h2>
     <div class="contact">
         <div class="no-padding"><b>{% blocktrans %}{{ v_depot }}-Betreuung{% endblocktrans %}</b></div>
-        <div class="no-padding">{{ depot.contact.first_name }} {{ depot.contact.last_name }}</div>
-        <div class="no-padding">{{ depot.contact.email }}</div>
-        <div class="no-padding">{{ depot.contact.phone }}</div>
+        {% for contact in depot.contact_names %}
+            <div class="no-padding">{{ contact }}</div>
+            {% if contact.email %}<div class="no-padding">{{ contact.email }}</div>{% endif %}
+            {% if contact.phone %}<div class="no-padding">{{ contact.phone }}</div>{% endif %}
+        {% endfor %}
     </div>
     <table class="depot-table" repeat="1">
         <th class="name">{% vocabulary "subscription" %}</th>
@@ -127,9 +129,13 @@
                 {% endif %}
                 </td>
                 {% for product in products %}
-                    <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
-                        {% if sub.custom.amounts_for_products|get_item:product != 0 %} <span>
-                    {{ sub.custom.amounts_for_products|get_item:product }} </span> {% endif %}</td>
+                    {% with amount=sub.custom.amounts_for_products|get_item:product %}
+                        <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
+                            {% if amount != 0 %}
+                                <span>{{ amount }}</span>
+                            {% endif %}
+                        </td>
+                    {% endwith %}
                 {% endfor %}
                 <td class="{% if forloop.counter|divisibleby:2 %}even{% endif %}"></td>
             </tr>

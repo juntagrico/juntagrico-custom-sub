@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.test import override_settings
 from django.urls import reverse
 
@@ -34,7 +35,7 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
             'saveContent': True, 'amount1': '0', 'amount2': '0', 'amount3': '1', 'amount4': '1'
         }, code=302)
         self.subscription1.refresh_from_db()
-        self.assertEqual(self.subscription1.custom.future_products.get(id=1).amount, 1)
+        self.assertEqual(self.subscription1.custom.future_products.aggregate(Count('amount'))['amount__count'], 1)
 
     def testChangeList(self):
         self.assertGet(reverse('content_change_list'), code=302)

@@ -1,6 +1,9 @@
 # test_settings.py
 import os
 
+from juntagrico import defaults
+from juntagrico_custom_sub import defaults as cs_defaults
+
 DEBUG = True
 
 SECRET_KEY = "fake-key"
@@ -14,16 +17,17 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.admin",
-    "fontawesomefree",
+    "juntagrico.apps.JuntagricoAdminConfig",
     "impersonate",
-    "import_export",
-    "crispy_forms",
-    "adminsortable2",
-    "djrichtextfield",
-    "polymorphic",
     "juntagrico_custom_sub",
     "juntagrico",
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "adminsortable2",
+    "django_select2",
+    "polymorphic",
+    "import_export",
+    "djrichtextfield",
 ]
 
 DATABASES = {
@@ -49,6 +53,8 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "impersonate.middleware.ImpersonateMiddleware",
 )
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = os.environ.get("JUNTAGRICO_EMAIL_HOST")
 EMAIL_HOST_USER = os.environ.get("JUNTAGRICO_EMAIL_USER")
@@ -119,12 +125,16 @@ TEMPLATES = [
 
 LOGIN_REDIRECT_URL = "/"
 
-SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
-
 IMPERSONATE = {
     "REDIRECT_URL": "/my/profile",
 }
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
+DJRICHTEXTFIELD_CONFIG = defaults.richtextfield_config(LANGUAGE_CODE)
+
 ENABLE_SHARES = True
+
+SIGNUP_MANAGER = "juntagrico_custom_sub.util.sessions.SignupManager"
+
+DEPOT_LISTS = cs_defaults.DEPOT_LISTS
