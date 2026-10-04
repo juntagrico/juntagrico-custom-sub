@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "impersonate",
     "juntagrico_custom_sub",
     "juntagrico",
+    "juntagrico_legacy",
     "crispy_forms",
     "crispy_bootstrap4",
     "adminsortable2",
