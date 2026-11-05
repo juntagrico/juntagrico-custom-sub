@@ -119,7 +119,7 @@
             <th style="word-wrap: break-word;">{{ product.name|safe }}</th>
         {% endfor %}
         <th style="width: 70px;">Abo <br> Abgeholt</th>
-        {% for sub in depot.active_subscriptions|dictsort:"primary_member.last_name" %}
+        {% for sub in depot.due_subscriptions|dictsort:"primary_member.last_name" %}
             <tr>
                 <td class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">
                 {% if sub.nickname %}
@@ -143,7 +143,7 @@
         <tr>
             <td class="total">Total</td>
             {% for product in products %}
-                <td class="total">{{ depot.product_totals|get_item:product }}</td>
+                <td class="total">{{ depot.due_product_totals|get_item:product }}</td>
             {% endfor %}
         </tr>
     </table>

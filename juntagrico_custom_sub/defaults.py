@@ -1,8 +1,14 @@
 def depot_list_context(context):
     import copy
+    import datetime
     from juntagrico_custom_sub import entity
 
-    depots = entity.cs_depot.CsDepot.objects.all().filter(depot_list=True).order_by("sort_order")
+    # only list subscriptions that get a delivery on the list date, i.e. respect the interval of subscription types
+    date = context.get('date') or datetime.date.today()
+    depots = list(entity.cs_depot.CsDepot.objects.all().filter(depot_list=True).order_by("sort_order"))
+    for depot in depots:
+        depot.due_subscriptions = depot.subscriptions_on(date)
+        depot.due_product_totals = depot.product_totals_on(date)
     products = entity.product.Product.objects.all().order_by("code")
     latest_delivery = entity.custom_delivery.CustomDelivery.objects.order_by("-delivery_date").first()
 
@@ -39,7 +45,7 @@ def pack_list_context(context):
     for weekday, depot_list in grouped_depots.items():
         total = [0] * len(deliveryProducts)
         for depot in depot_list:
-            product_totals = depot.product_totals
+            product_totals = depot.due_product_totals
             for idx, prod in enumerate(deliveryProducts):
                 total[idx] = total[idx] + product_totals[prod]
                 overallTotal[idx] = overallTotal[idx] + product_totals[prod]
