@@ -47,6 +47,14 @@ from juntagrico_custom_sub import defaults as cs_defaults
 DEPOT_LISTS = cs_defaults.DEPOT_LISTS
 ```
 
+The depot lists respect the delivery interval (`interval` and `offset`) of the subscription types:
+A subscription is only listed on the dates on which one of its parts is delivered (see `generate_depot_list --days`).
+
+Because the content of a subscription is defined for the whole subscription,
+all regular (non-extra) parts of a subscription must have the same delivery rhythm.
+This is enforced when subscription parts are selected, ordered or changed, including in the admin.
+Run `python manage.py cs_check_rhythms` to list existing subscriptions that violate this rule.
+
 
 In your `urls.py` you also need to extend the pattern:
 
