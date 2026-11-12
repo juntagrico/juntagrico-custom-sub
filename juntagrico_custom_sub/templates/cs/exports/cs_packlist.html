@@ -85,8 +85,8 @@
                     class="name {% if forloop.counter|divisibleby:2 %}even{% endif %}">{{ depot.name }}</td>
                 {% for product in products %}
                     <td class="{% if forloop.parentloop.counter|divisibleby:2 %}even{% endif %}">
-                        {% if depot.product_totals|get_item:product != 0 %} <span>
-                    {{ depot.product_totals|get_item:product }} </span> {% endif %}</td>
+                        {% if depot.due_product_totals|get_item:product != 0 %} <span>
+                    {{ depot.due_product_totals|get_item:product }} </span> {% endif %}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
