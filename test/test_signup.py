@@ -139,6 +139,15 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
             self.assertGet(reverse('cs-co-members'))
 
         response = self.assertGet(reverse('cs-co-members'), 302, data={'next': '1'})
+        # In Juntagrico 2.1, membership step comes before shares
+        self.assertRedirects(response, reverse('cs-membership'))
+        self.assertGet(reverse('cs-membership'))
+        response = self.client.post(
+            reverse('cs-membership'),
+            {
+                'membership': '1',
+            }
+        )
         if Config.enable_shares():
             self.assertRedirects(response, reverse('cs-shares'))
             self.assertGet(reverse('cs-shares'))
@@ -149,7 +158,9 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
                     'of_co_member[0]': 0,
                 }
             )
-        self.assertRedirects(response, reverse('cs-summary'))
+            self.assertRedirects(response, reverse('cs-summary'))
+        else:
+            self.assertRedirects(response, reverse('cs-summary'))
         # confirm summary
         self.client.get(reverse('cs-summary'))
 

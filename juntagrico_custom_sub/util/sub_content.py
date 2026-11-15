@@ -16,17 +16,3 @@ def new_content_valid(total_units, custom_prods, products=None):
     if totalUnits < total_units:
         return "Nicht alle Einheiten zugewiesen."
     return ""
-
-
-def calculate_future_size(subscription):
-    result = 0
-    for part in subscription.active_and_future_parts:
-        result += part.type.size.units
-    return result
-
-
-def calculate_current_size(subscription):
-    result = 0
-    for part in subscription.active_parts:
-        result += part.type.size.units
-    return result
