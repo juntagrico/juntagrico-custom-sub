@@ -6,8 +6,8 @@ from juntagrico_custom_sub.views import add_products_to_subscription
 
 
 class SignupManager(sessions.SignupManager):
-    def apply_subscriptions(self, member, co_members):
-        subscription = super().apply_subscriptions(member, co_members)
+    def apply_subscriptions(self, member):
+        subscription = super().apply_subscriptions(member)
         if subscription is not None:
             # create custom products
             custom_prod = self.get('custom_products')

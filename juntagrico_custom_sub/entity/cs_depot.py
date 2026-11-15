@@ -14,12 +14,12 @@ class CsDepot(Depot):
     def subscriptions_on(self, date=None):
         """
         subscriptions of this depot that get a delivery on the given date.
-        SubscriptionPartQuerySet.active_on respects interval and offset of the subscription types.
+        SubscriptionPartQuerySet.served_on respects interval and offset of the subscription types.
         Extra parts are ignored, as they are not part of the custom content.
         """
         date = date or datetime.date.today()
-        due_parts = SubscriptionPart.objects.is_normal().active_on(date)
-        return self.subscription_set.active_on(date).filter(
+        due_parts = SubscriptionPart.objects.is_normal().served_on(date)
+        return self.subscription_set.served_on(date).filter(
             pk__in=due_parts.values('subscription_id')
         ).order_by('primary_member__first_name', 'primary_member__last_name')
 

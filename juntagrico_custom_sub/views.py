@@ -13,7 +13,6 @@ from juntagrico.view_decorators import signup_session, primary_member_of_subscri
     primary_member_of_subscription_of_part
 from juntagrico.entity.subs import Subscription, SubscriptionPart
 from juntagrico.util import return_to_previous_location
-from juntagrico.util.management_list import get_changedate
 
 from juntagrico_custom_sub.entity.product import Product
 from juntagrico_custom_sub.entity.subscription_content import SubscriptionContent
@@ -189,22 +188,20 @@ def parse_selected_custom_products(post_data, products):
     }
 
 
-@permission_required("juntagrico.is_operations_group")
-def list_content_changes(request, subscription_id=None):
-    render_dict = get_changedate(request)
+@permission_required("juntagrico_custom_sub.subscriptioncontent_view")
+def list_content_changes(request):
     changedlist = []
     subscriptions_list = Subscription.objects.active().filter(custom__isnull=False)
     for subscription in subscriptions_list:
         if subscription.custom.content_changed:
             changedlist.append(subscription)
 
-    render_dict.update({
+    return render(request, "cs/list_content_changes.html", {
         'management_list': changedlist,
     })
-    return render(request, "cs/list_content_changes.html", render_dict)
 
 
-@permission_required("juntagrico.is_operations_group")
+@permission_required("juntagrico_custom_sub.subscriptioncontent_change")
 def activate_future_content(request, subscription_id):
     subscription = get_object_or_404(Subscription, id=subscription_id)
     for content in subscription.custom.products.all():
