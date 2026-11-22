@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib.auth.decorators import permission_required
+from django.db import transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -202,11 +203,11 @@ def list_content_changes(request):
 
 @permission_required("juntagrico_custom_sub.subscriptioncontent_change")
 def activate_future_content(request, subscription_id):
-    subscription = get_object_or_404(Subscription, id=subscription_id)
-    for content in subscription.custom.products.all():
-        content.delete()
-    for content in subscription.custom.future_products.all():
-        SubscriptionContentItem.objects.create(
-            subscription_content=subscription.custom, amount=content.amount, product=content.product
+    content = get_object_or_404(SubscriptionContent, subscription_id=subscription_id)
+    with transaction.atomic():
+        content.products.all().delete()
+        SubscriptionContentItem.objects.bulk_create(
+            SubscriptionContentItem(subscription_content=content, amount=item.amount, product_id=item.product_id)
+            for item in content.future_products.all()
         )
     return return_to_previous_location(request)

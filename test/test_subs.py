@@ -50,3 +50,29 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
         self.assertRedirects(response, reverse('content_edit', args=[self.subscription1.pk]))
         part.refresh_from_db()
         self.assertIsNotNone(part.cancellation_date)
+
+    def _set_changed_content(self):
+        content = self.subscription1.custom
+        content.products.create(product=self.product1, amount=1)
+        content.future_products.create(product=self.product1, amount=2)
+        content.future_products.create(product=self.product2, amount=1)
+        return content
+
+    def testChangeListShowsChangedContent(self):
+        self._set_changed_content()
+        response = self.assertGet(reverse('content_change_list'), member=self.admin)
+        self.assertEqual(response.context['management_list'], [self.subscription1])
+        self.assertContains(response, reverse('content_activate', args=[self.subscription1.pk]))
+
+    def testActivateFutureContent(self):
+        content = self._set_changed_content()
+        url = reverse('content_activate', args=[self.subscription1.pk])
+        # must not change data on GET
+        self.assertGet(url, code=405, member=self.admin)
+        self.assertTrue(content.content_changed)
+        self.assertPost(url, code=302, member=self.admin)
+        self.assertFalse(content.content_changed)
+        self.assertEqual(
+            dict(content.products.values_list('product_id', 'amount')),
+            {self.product1.id: 2, self.product2.id: 1},
+        )

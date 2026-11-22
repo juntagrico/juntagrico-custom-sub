@@ -37,7 +37,7 @@
         {% for subscription in management_list %}
             <tr>
                 <td>
-                    <a href="/admin/juntagrico/subscription/{{ subscription.id }}/change/">
+                    <a href="{% url 'admin:juntagrico_subscription_change' subscription.id %}">
                         {{ subscription }}
                     </a>
                 </td>
@@ -51,9 +51,12 @@
                     {{ subscription.custom.display_future_content|join:"<br/>" }}
                 </td>
                 <td>
-                    <a href="/cs/content/change/{{ subscription.id }}/" class="btn btn-success">
-                        {% trans "ändern" %}
-                    </a>
+                    <form method="post" action="{% url 'content_activate' subscription.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            {% trans "ändern" %}
+                        </button>
+                    </form>
                 </td>
             </tr>
         {% endfor %}
