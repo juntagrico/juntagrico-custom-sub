@@ -158,9 +158,7 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
                     'of_co_member[0]': 0,
                 }
             )
-            self.assertRedirects(response, reverse('cs-summary'))
-        else:
-            self.assertRedirects(response, reverse('cs-summary'))
+        self.assertRedirects(response, reverse('cs-summary'))
         # confirm summary
         self.client.get(reverse('cs-summary'))
 
