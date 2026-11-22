@@ -190,11 +190,10 @@ def parse_selected_custom_products(post_data, products):
 
 @permission_required("juntagrico_custom_sub.subscriptioncontent_view")
 def list_content_changes(request):
-    changedlist = []
-    subscriptions_list = Subscription.objects.active().filter(custom__isnull=False)
-    for subscription in subscriptions_list:
-        if subscription.custom.content_changed:
-            changedlist.append(subscription)
+    subscriptions_list = Subscription.objects.active().filter(custom__isnull=False).select_related(
+        'custom'
+    ).prefetch_related('custom__products', 'custom__future_products')
+    changedlist = [subscription for subscription in subscriptions_list if subscription.custom.content_changed]
 
     return render(request, "cs/list_content_changes.html", {
         'management_list': changedlist,

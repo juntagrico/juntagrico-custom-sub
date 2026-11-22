@@ -64,6 +64,17 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
         self.assertEqual(response.context['management_list'], [self.subscription1])
         self.assertContains(response, reverse('content_activate', args=[self.subscription1.pk]))
 
+    def testContentChanged(self):
+        content = self.subscription1.custom
+        self.assertFalse(content.content_changed)
+        content.products.create(product=self.product1, amount=1)
+        self.assertTrue(content.content_changed)  # product removed in future content
+        future = content.future_products.create(product=self.product1, amount=1)
+        self.assertFalse(content.content_changed)
+        future.amount = 2
+        future.save()
+        self.assertTrue(content.content_changed)
+
     def testActivateFutureContent(self):
         content = self._set_changed_content()
         url = reverse('content_activate', args=[self.subscription1.pk])

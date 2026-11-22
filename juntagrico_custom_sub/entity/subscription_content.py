@@ -60,22 +60,10 @@ class SubscriptionContent(models.Model):
 
     @property
     def content_changed(self):
-        changed = False
-        products = Product.objects.all().order_by('id')
-        currentProducts = self.products.all()
-        futureProducts = self.future_products.all()
-        for prod in products:
-            current = next((x for x in currentProducts if x.product == prod), None)
-            future = next((x for x in futureProducts if x.product == prod), None)
-            if not (current) and not (future):
-                continue
-            if (not current) or not (future):
-                changed = True
-                break
-            if (current.amount != future.amount):
-                changed = True
-                break
-        return changed
+        # uses .all() so that prefetched items are reused
+        current = {item.product_id: item.amount for item in self.products.all()}
+        future = {item.product_id: item.amount for item in self.future_products.all()}
+        return current != future
 
     class Meta:
         verbose_name = _('Abo Inhalt')
