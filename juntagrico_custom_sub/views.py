@@ -11,7 +11,7 @@ from juntagrico.views import subscription as subscription_view
 from juntagrico.mailer import adminnotification
 from juntagrico.view_decorators import signup_session, primary_member_of_subscription, \
     primary_member_of_subscription_of_part
-from juntagrico.entity.subs import Subscription, SubscriptionPart
+from juntagrico.entity.subs import Subscription
 from juntagrico.util import return_to_previous_location
 
 from juntagrico_custom_sub.entity.product import Product
@@ -24,15 +24,14 @@ from juntagrico_custom_sub.util.sub_content import new_content_valid
 logger = logging.getLogger(__name__)
 
 
-@primary_member_of_subscription
-def cancel_part(request, part_id, subscription_id):
+@primary_member_of_subscription_of_part
+def cancel_part(request, part):
     """
     Overriden from core to redirect to the content change page
     """
-    part = get_object_or_404(SubscriptionPart, subscription__id=subscription_id, id=part_id)
     part.cancel()
     adminnotification.subpart_canceled(part)
-    return redirect("content_edit", subscription_id=subscription_id)
+    return redirect("content_edit", subscription_id=part.subscription_id)
 
 
 @primary_member_of_subscription_of_part

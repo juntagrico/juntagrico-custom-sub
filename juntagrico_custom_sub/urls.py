@@ -25,8 +25,7 @@ urlpatterns = [
     path('cs/signup/initialselect/', views.initial_select_content, name='custom_sub_initial_select'),
     path('cs/content/change/<subscription_id>/', views.activate_future_content),
     # urls overriden from core to make the management of custom composition of subscriptions possible
-    path('my/subpart/cancel/<int:part_id>/<int:subscription_id>/', views.cancel_part,
-         name='part-cancel'),
+    path('my/subscription/part/<int:part_id>/cancel', views.cancel_part, name='part-cancel'),
     path('my/subscription/part/<int:part_id>/change', views.part_change, name='part-change'),
     path('my/subscription/<int:subscription_id>/order/', views.part_order, name='part-order'),
     path('my/subscription/<int:subscription_id>/order/extra/', views.part_order, {'extra': True},

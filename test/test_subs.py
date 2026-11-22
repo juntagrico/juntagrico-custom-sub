@@ -40,3 +40,13 @@ class CustomSubTests(JuntagricoCustomSubTestCase):
     def testChangeList(self):
         self.assertGet(reverse('content_change_list'), code=302)
         self.assertGet(reverse('content_change_list'), member=self.admin)
+
+    def testCancelPartRedirectsToContentEdit(self):
+        part = self.subscription1.parts.first()
+        url = reverse('part-cancel', args=[part.id])
+        # core templates reverse 'part-cancel' with the part id only. It must resolve to the plugin view
+        self.assertEqual(url, f'/my/subscription/part/{part.id}/cancel')
+        response = self.assertGet(url, code=302)
+        self.assertRedirects(response, reverse('content_edit', args=[self.subscription1.pk]))
+        part.refresh_from_db()
+        self.assertIsNotNone(part.cancellation_date)
